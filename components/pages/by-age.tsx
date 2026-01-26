@@ -97,15 +97,84 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
                     border: "1px solid #e2e8f0",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number) => {
-                    const total = ageData.reduce(
-                      (sum, item) => sum + item.total,
-                      0,
-                    );
-                    const percent = total
-                      ? ((value / total) * 100).toFixed(1)
-                      : "0.0";
-                    return `${value} (${percent}%)`;
+                  itemStyle={{ fontSize: "12px" }}
+                  labelStyle={{ fontWeight: "bold", marginBottom: "5px" }}
+                  cursor={{ fill: "transparent" }}
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      const pns =
+                        (payload.find((p) => p.name === "PNS")
+                          ?.value as number) || 0;
+                      const cpns =
+                        (payload.find((p) => p.name === "CPNS")
+                          ?.value as number) || 0;
+                      const pppk =
+                        (payload.find((p) => p.name === "PPPK")
+                          ?.value as number) || 0;
+                      const ki =
+                        (payload.find((p) => p.name === "KI")
+                          ?.value as number) || 0;
+
+                      const total = pns + cpns + pppk + ki;
+
+                      const pnsPercent = total
+                        ? ((pns / total) * 100).toFixed(1)
+                        : "0.0";
+                      const cpnsPercent = total
+                        ? ((cpns / total) * 100).toFixed(1)
+                        : "0.0";
+                      const pppkPercent = total
+                        ? ((pppk / total) * 100).toFixed(1)
+                        : "0.0";
+                      const kiPercent = total
+                        ? ((ki / total) * 100).toFixed(1)
+                        : "0.0";
+
+                      return (
+                        <div className="bg-white p-3 border border-slate-200 rounded-lg shadow-lg">
+                          <p className="font-bold text-sm mb-2">{label}</p>
+                          <div className="space-y-1 text-xs">
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                              <span className="text-slate-600">PNS:</span>
+                              <span className="font-semibold">
+                                {pns} ({pnsPercent}%)
+                              </span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                              <span className="text-slate-600">CPNS:</span>
+                              <span className="font-semibold">
+                                {cpns} ({cpnsPercent}%)
+                              </span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                              <span className="text-slate-600">PPPK:</span>
+                              <span className="font-semibold">
+                                {pppk} ({pppkPercent}%)
+                              </span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
+                              <span className="text-slate-600">KI:</span>
+                              <span className="font-semibold">
+                                {ki} ({kiPercent}%)
+                              </span>
+                            </p>
+                            <div className="border-t border-slate-100 my-1 pt-1">
+                              <p className="flex items-center gap-2 font-medium">
+                                <span className="text-slate-700">Total:</span>
+                                <span className="font-bold text-slate-900">
+                                  {total}
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
                   }}
                 />
                 <Legend />
