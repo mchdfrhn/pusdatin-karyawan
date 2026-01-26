@@ -96,15 +96,56 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
                     border: "1px solid #e2e8f0",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number) => {
-                    const totalEmployees = positionData.reduce(
-                      (sum, item) => sum + item.male + item.female,
-                      0,
-                    );
-                    const percent = totalEmployees
-                      ? ((value / totalEmployees) * 100).toFixed(1)
-                      : "0.0";
-                    return `${value} (${percent}%)`;
+                  itemStyle={{ fontSize: "12px" }}
+                  labelStyle={{ fontWeight: "bold", marginBottom: "5px" }}
+                  cursor={{ fill: "transparent" }}
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      const male =
+                        (payload.find((p) => p.name === "Laki-laki")
+                          ?.value as number) || 0;
+                      const female =
+                        (payload.find((p) => p.name === "Perempuan")
+                          ?.value as number) || 0;
+                      const total = male + female;
+                      const malePercent = total
+                        ? ((male / total) * 100).toFixed(1)
+                        : "0.0";
+                      const femalePercent = total
+                        ? ((female / total) * 100).toFixed(1)
+                        : "0.0";
+
+                      return (
+                        <div className="bg-white p-3 border border-slate-200 rounded-lg shadow-lg">
+                          <p className="font-bold text-sm mb-2">{label}</p>
+                          <div className="space-y-1 text-xs">
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                              <span className="text-slate-600">Laki-laki:</span>
+                              <span className="font-semibold">
+                                {male} ({malePercent}%)
+                              </span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-pink-500"></span>
+                              <span className="text-slate-600">Perempuan:</span>
+                              <span className="font-semibold">
+                                {female} ({femalePercent}%)
+                              </span>
+                            </p>
+                            <div className="border-t border-slate-100 my-1 pt-1">
+                              <p className="flex items-center gap-2 font-medium">
+                                <span className="text-slate-700">Total:</span>
+                                <span className="font-bold text-slate-900">
+                                  {total}
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
                   }}
                 />
                 <Legend />
