@@ -35,7 +35,7 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
         y={y + 8}
         fill="#374151"
         textAnchor="middle"
-        fontSize={10}
+        fontSize={11}
         fontWeight="500"
       >
         {value}

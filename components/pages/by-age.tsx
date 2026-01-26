@@ -35,7 +35,7 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
         y={y - 5}
         fill="#374151"
         textAnchor="middle"
-        fontSize={11}
+        fontSize={12}
         fontWeight="500"
       >
         {value}
