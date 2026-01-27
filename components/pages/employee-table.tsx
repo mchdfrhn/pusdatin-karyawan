@@ -1,31 +1,44 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { RawRow } from "@/lib/data/employee-stats"
+import { useEffect, useMemo, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import type { RawRow } from "@/lib/data/employee-stats";
 
 type EmployeeTableProps = {
-  rows: RawRow[]
-  status: "loading" | "ready" | "error"
-  error: string | null
-}
+  rows: RawRow[];
+  status: "loading" | "ready" | "error";
+  error: string | null;
+};
 
 type Column = {
-  key: string
-  label: string
-}
+  key: string;
+  label: string;
+};
 
 type FilterOption = {
-  value: string
-  label: string
-}
+  value: string;
+  label: string;
+};
 
-const DEFAULT_PAGE_SIZE = 20
-const COLUMN_OVERRIDE = process.env.NEXT_PUBLIC_EMPLOYEE_TABLE_COLUMNS
+const DEFAULT_PAGE_SIZE = 20;
+const COLUMN_OVERRIDE = process.env.NEXT_PUBLIC_EMPLOYEE_TABLE_COLUMNS;
 const EDUCATION_KEYS = [
   "pendidikan_terakhir",
   "pendidikan",
@@ -33,7 +46,7 @@ const EDUCATION_KEYS = [
   "education_level",
   "tingkat_pendidikan",
   "tingkatpendidikan",
-]
+];
 const CATEGORY_KEYS = [
   "kategori",
   "status",
@@ -42,7 +55,8 @@ const CATEGORY_KEYS = [
   "status_kepegawaian",
   "jenis_pegawai",
   "kategoripegawai",
-]
+];
+const GENDER_KEYS = ["gender", "jenis_kelamin", "jeniskelamin", "jk", "sex"];
 
 const COLUMN_LABELS: Record<string, string> = {
   nama: "Nama",
@@ -80,7 +94,7 @@ const COLUMN_LABELS: Record<string, string> = {
   instansi: "Instansi",
   created_at: "Dibuat",
   updated_at: "Diubah",
-}
+};
 
 const COLUMN_PRIORITY = [
   "nama",
@@ -114,33 +128,33 @@ const COLUMN_PRIORITY = [
   "instansi",
   "created_at",
   "updated_at",
-]
+];
 
 function humanizeKey(key: string) {
-  const lower = key.toLowerCase()
+  const lower = key.toLowerCase();
   if (COLUMN_LABELS[lower]) {
-    return COLUMN_LABELS[lower]
+    return COLUMN_LABELS[lower];
   }
   return lower
     .replace(/_/g, " ")
-    .replace(/\b\w/g, (match) => match.toUpperCase())
+    .replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
 function buildColumns(rows: RawRow[], override?: string): Column[] {
   if (!rows.length) {
-    return []
+    return [];
   }
 
-  const keys = new Set<string>()
+  const keys = new Set<string>();
   rows.slice(0, 50).forEach((row) => {
-    Object.keys(row).forEach((key) => keys.add(key))
-  })
+    Object.keys(row).forEach((key) => keys.add(key));
+  });
 
-  const keyLookup = new Map<string, string>()
-  keys.forEach((key) => keyLookup.set(key.toLowerCase(), key))
+  const keyLookup = new Map<string, string>();
+  keys.forEach((key) => keyLookup.set(key.toLowerCase(), key));
 
-  const selected: Column[] = []
-  const used = new Set<string>()
+  const selected: Column[] = [];
+  const used = new Set<string>();
 
   if (override) {
     override
@@ -148,232 +162,308 @@ function buildColumns(rows: RawRow[], override?: string): Column[] {
       .map((item) => item.trim())
       .filter(Boolean)
       .forEach((rawKey) => {
-        const actual = keyLookup.get(rawKey.toLowerCase())
+        const actual = keyLookup.get(rawKey.toLowerCase());
         if (actual && !used.has(actual)) {
-          used.add(actual)
-          selected.push({ key: actual, label: humanizeKey(actual) })
+          used.add(actual);
+          selected.push({ key: actual, label: humanizeKey(actual) });
         }
-      })
+      });
     if (selected.length) {
-      return selected
+      return selected;
     }
   }
 
   COLUMN_PRIORITY.forEach((priorityKey) => {
-    const actual = keyLookup.get(priorityKey)
+    const actual = keyLookup.get(priorityKey);
     if (actual && !used.has(actual)) {
-      used.add(actual)
-      selected.push({ key: actual, label: humanizeKey(actual) })
+      used.add(actual);
+      selected.push({ key: actual, label: humanizeKey(actual) });
     }
-  })
+  });
 
   Array.from(keys)
     .filter((key) => !used.has(key))
     .sort((a, b) => a.localeCompare(b, "id"))
-    .forEach((key) => selected.push({ key, label: humanizeKey(key) }))
+    .forEach((key) => selected.push({ key, label: humanizeKey(key) }));
 
-  return selected
+  return selected;
 }
 
 function findKey(rows: RawRow[], candidates: string[]): string | null {
   if (!rows.length) {
-    return null
+    return null;
   }
-  const keyLookup = new Map<string, string>()
+  const keyLookup = new Map<string, string>();
   rows.slice(0, 50).forEach((row) => {
-    Object.keys(row).forEach((key) => keyLookup.set(key.toLowerCase(), key))
-  })
+    Object.keys(row).forEach((key) => keyLookup.set(key.toLowerCase(), key));
+  });
   for (const candidate of candidates) {
-    const actual = keyLookup.get(candidate.toLowerCase())
+    const actual = keyLookup.get(candidate.toLowerCase());
     if (actual) {
-      return actual
+      return actual;
     }
   }
-  return null
+  return null;
 }
 
 function valueToText(value: unknown): string {
   if (value === null || value === undefined) {
-    return ""
+    return "";
   }
   if (typeof value === "string") {
-    return value
+    return value;
   }
   if (typeof value === "number" || typeof value === "boolean") {
-    return String(value)
+    return String(value);
   }
   if (value instanceof Date) {
-    return value.toISOString()
+    return value.toISOString();
   }
   if (Array.isArray(value)) {
-    return value.map((item) => valueToText(item)).join(" ")
+    return value.map((item) => valueToText(item)).join(" ");
   }
   if (typeof value === "object") {
     try {
-      return JSON.stringify(value)
+      return JSON.stringify(value);
     } catch {
-      return String(value)
+      return String(value);
     }
   }
-  return String(value)
+  return String(value);
 }
 
 function formatValue(value: unknown): string {
   if (value === null || value === undefined || value === "") {
-    return "-"
+    return "-";
   }
   if (typeof value === "number") {
-    return value.toLocaleString("id-ID")
+    return value.toLocaleString("id-ID");
   }
   if (typeof value === "boolean") {
-    return value ? "Ya" : "Tidak"
+    return value ? "Ya" : "Tidak";
   }
   if (value instanceof Date) {
-    return value.toLocaleDateString("id-ID")
+    return value.toLocaleDateString("id-ID");
   }
   if (Array.isArray(value)) {
-    return value.map((item) => formatValue(item)).join(", ")
+    return value.map((item) => formatValue(item)).join(", ");
   }
   if (typeof value === "object") {
     try {
-      return JSON.stringify(value)
+      return JSON.stringify(value);
     } catch {
-      return String(value)
+      return String(value);
     }
   }
-  return String(value)
+  return String(value);
 }
 
 function getRowKey(row: RawRow, fallback: number): string {
-  const candidateKeys = ["id", "uuid", "nip", "nik", "nup"]
+  const candidateKeys = ["id", "uuid", "nip", "nik", "nup"];
   for (const key of Object.keys(row)) {
     if (candidateKeys.includes(key.toLowerCase())) {
-      const value = row[key]
+      const value = row[key];
       if (typeof value === "string" || typeof value === "number") {
-        return String(value)
+        return String(value);
       }
     }
   }
-  return String(fallback)
+  return String(fallback);
 }
 
 export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
-  const [search, setSearch] = useState("")
-  const [educationFilter, setEducationFilter] = useState("all")
-  const [categoryFilter, setCategoryFilter] = useState("all")
-  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState("");
+  const [educationFilter, setEducationFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [genderFilter, setGenderFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
-  const columns = useMemo(() => buildColumns(rows, COLUMN_OVERRIDE), [rows])
-  const educationKey = useMemo(() => findKey(rows, EDUCATION_KEYS), [rows])
-  const categoryKey = useMemo(() => findKey(rows, CATEGORY_KEYS), [rows])
+  const columns = useMemo(() => buildColumns(rows, COLUMN_OVERRIDE), [rows]);
+  const educationKey = useMemo(() => findKey(rows, EDUCATION_KEYS), [rows]);
+  const categoryKey = useMemo(() => findKey(rows, CATEGORY_KEYS), [rows]);
+  const genderKey = useMemo(() => findKey(rows, GENDER_KEYS), [rows]);
   const educationOptions = useMemo<FilterOption[]>(() => {
     if (!educationKey) {
-      return []
+      return [];
     }
-    const options = new Map<string, string>()
+    const options = new Map<string, string>();
     rows.forEach((row) => {
-      const rawValue = row[educationKey]
+      const rawValue = row[educationKey];
       if (rawValue === null || rawValue === undefined) {
-        return
+        return;
       }
-      const label = String(rawValue).trim()
+      const label = String(rawValue).trim();
       if (!label) {
-        return
+        return;
       }
-      const key = label.toLowerCase()
+      const key = label.toLowerCase();
       if (!options.has(key)) {
-        options.set(key, label)
+        options.set(key, label);
       }
-    })
+    });
     return Array.from(options.entries())
       .map(([value, label]) => ({ value, label }))
-      .sort((a, b) => a.label.localeCompare(b.label, "id"))
-  }, [rows, educationKey])
+      .sort((a, b) => a.label.localeCompare(b.label, "id"));
+  }, [rows, educationKey]);
   const categoryOptions = useMemo<FilterOption[]>(() => {
     if (!categoryKey) {
-      return []
+      return [];
     }
-    const options = new Map<string, string>()
+    const options = new Map<string, string>();
     rows.forEach((row) => {
-      const rawValue = row[categoryKey]
+      const rawValue = row[categoryKey];
       if (rawValue === null || rawValue === undefined) {
-        return
+        return;
       }
-      const label = String(rawValue).trim()
+      const label = String(rawValue).trim();
       if (!label) {
-        return
+        return;
       }
-      const key = label.toLowerCase()
+      const key = label.toLowerCase();
       if (!options.has(key)) {
-        options.set(key, label)
+        options.set(key, label);
       }
-    })
+    });
     return Array.from(options.entries())
       .map(([value, label]) => ({ value, label }))
-      .sort((a, b) => a.label.localeCompare(b.label, "id"))
-  }, [rows, categoryKey])
+      .sort((a, b) => a.label.localeCompare(b.label, "id"));
+  }, [rows, categoryKey]);
+  const genderOptions = useMemo<FilterOption[]>(() => {
+    if (!genderKey) {
+      return [];
+    }
+    const options = new Map<string, string>();
+    rows.forEach((row) => {
+      const rawValue = row[genderKey];
+      if (rawValue === null || rawValue === undefined) {
+        return;
+      }
+      const label = String(rawValue).trim();
+      if (!label) {
+        return;
+      }
+      const key = label.toLowerCase();
+      if (!options.has(key)) {
+        options.set(key, label);
+      }
+    });
+    return Array.from(options.entries())
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label, "id"));
+  }, [rows, genderKey]);
 
   const filteredRows = useMemo(() => {
-    const query = search.trim().toLowerCase()
+    const query = search.trim().toLowerCase();
     return rows.filter((row) => {
       if (educationKey && educationFilter !== "all") {
-        const rawValue = row[educationKey]
-        const normalized = rawValue === null || rawValue === undefined ? "" : String(rawValue).trim().toLowerCase()
+        const rawValue = row[educationKey];
+        const normalized =
+          rawValue === null || rawValue === undefined
+            ? ""
+            : String(rawValue).trim().toLowerCase();
         if (!normalized || normalized !== educationFilter) {
-          return false
+          return false;
         }
       }
       if (categoryKey && categoryFilter !== "all") {
-        const rawValue = row[categoryKey]
-        const normalized = rawValue === null || rawValue === undefined ? "" : String(rawValue).trim().toLowerCase()
+        const rawValue = row[categoryKey];
+        const normalized =
+          rawValue === null || rawValue === undefined
+            ? ""
+            : String(rawValue).trim().toLowerCase();
         if (!normalized || normalized !== categoryFilter) {
-          return false
+          return false;
+        }
+      }
+      if (genderKey && genderFilter !== "all") {
+        const rawValue = row[genderKey];
+        const normalized =
+          rawValue === null || rawValue === undefined
+            ? ""
+            : String(rawValue).trim().toLowerCase();
+        if (!normalized || normalized !== genderFilter) {
+          return false;
         }
       }
       if (!query) {
-        return true
+        return true;
       }
-      const haystack = columns.map((col) => valueToText(row[col.key]).toLowerCase()).join(" ")
-      return haystack.includes(query)
-    })
-  }, [rows, search, columns, educationFilter, educationKey, categoryFilter, categoryKey])
+      const haystack = columns
+        .map((col) => valueToText(row[col.key]).toLowerCase())
+        .join(" ");
+      return haystack.includes(query);
+    });
+  }, [
+    rows,
+    search,
+    columns,
+    educationFilter,
+    educationKey,
+    categoryFilter,
+    categoryKey,
+    genderFilter,
+    genderKey,
+  ]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / DEFAULT_PAGE_SIZE))
-  const safePage = Math.min(page, totalPages)
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredRows.length / DEFAULT_PAGE_SIZE),
+  );
+  const safePage = Math.min(page, totalPages);
 
   useEffect(() => {
     if (page !== safePage) {
-      setPage(safePage)
+      setPage(safePage);
     }
-  }, [page, safePage])
+  }, [page, safePage]);
 
   useEffect(() => {
     if (educationFilter === "all") {
-      return
+      return;
     }
-    const isValid = educationOptions.some((option) => option.value === educationFilter)
+    const isValid = educationOptions.some(
+      (option) => option.value === educationFilter,
+    );
     if (!isValid) {
-      setEducationFilter("all")
+      setEducationFilter("all");
     }
-  }, [educationFilter, educationOptions])
+  }, [educationFilter, educationOptions]);
 
   useEffect(() => {
     if (categoryFilter === "all") {
-      return
+      return;
     }
-    const isValid = categoryOptions.some((option) => option.value === categoryFilter)
+    const isValid = categoryOptions.some(
+      (option) => option.value === categoryFilter,
+    );
     if (!isValid) {
-      setCategoryFilter("all")
+      setCategoryFilter("all");
     }
-  }, [categoryFilter, categoryOptions])
+  }, [categoryFilter, categoryOptions]);
+
+  useEffect(() => {
+    if (genderFilter === "all") {
+      return;
+    }
+    const isValid = genderOptions.some(
+      (option) => option.value === genderFilter,
+    );
+    if (!isValid) {
+      setGenderFilter("all");
+    }
+  }, [genderFilter, genderOptions]);
 
   const pageRows = useMemo(() => {
-    const startIndex = (safePage - 1) * DEFAULT_PAGE_SIZE
-    return filteredRows.slice(startIndex, startIndex + DEFAULT_PAGE_SIZE)
-  }, [filteredRows, safePage])
+    const startIndex = (safePage - 1) * DEFAULT_PAGE_SIZE;
+    return filteredRows.slice(startIndex, startIndex + DEFAULT_PAGE_SIZE);
+  }, [filteredRows, safePage]);
 
-  const pageStart = filteredRows.length ? (safePage - 1) * DEFAULT_PAGE_SIZE + 1 : 0
-  const pageEnd = filteredRows.length ? Math.min(safePage * DEFAULT_PAGE_SIZE, filteredRows.length) : 0
+  const pageStart = filteredRows.length
+    ? (safePage - 1) * DEFAULT_PAGE_SIZE + 1
+    : 0;
+  const pageEnd = filteredRows.length
+    ? Math.min(safePage * DEFAULT_PAGE_SIZE, filteredRows.length)
+    : 0;
 
   if (status === "loading") {
     return (
@@ -381,9 +471,11 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
         <CardHeader>
           <CardTitle>Data Pegawai</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm text-slate-600">Memuat data pegawai...</CardContent>
+        <CardContent className="text-sm text-slate-600">
+          Memuat data pegawai...
+        </CardContent>
       </Card>
-    )
+    );
   }
 
   if (status === "error") {
@@ -392,9 +484,11 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
         <CardHeader>
           <CardTitle>Data Pegawai</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm text-red-600">{error || "Gagal memuat data pegawai."}</CardContent>
+        <CardContent className="text-sm text-red-600">
+          {error || "Gagal memuat data pegawai."}
+        </CardContent>
       </Card>
-    )
+    );
   }
 
   if (!rows.length) {
@@ -403,9 +497,11 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
         <CardHeader>
           <CardTitle>Data Pegawai</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm text-slate-600">Belum ada data pegawai.</CardContent>
+        <CardContent className="text-sm text-slate-600">
+          Belum ada data pegawai.
+        </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -414,7 +510,9 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
         <CardHeader>
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <CardTitle>Data Pegawai</CardTitle>
-            <div className="text-sm text-slate-600">Total: {rows.length} baris</div>
+            <div className="text-sm text-slate-600">
+              Total: {rows.length} baris
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -425,8 +523,8 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                   placeholder="Cari nama, status, jabatan, atau lainnya..."
                   value={search}
                   onChange={(event) => {
-                    setSearch(event.target.value)
-                    setPage(1)
+                    setSearch(event.target.value);
+                    setPage(1);
                   }}
                 />
               </div>
@@ -434,8 +532,8 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                 <Select
                   value={categoryFilter}
                   onValueChange={(value) => {
-                    setCategoryFilter(value)
-                    setPage(1)
+                    setCategoryFilter(value);
+                    setPage(1);
                   }}
                   disabled={!categoryKey || categoryOptions.length === 0}
                 >
@@ -456,8 +554,8 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                 <Select
                   value={educationFilter}
                   onValueChange={(value) => {
-                    setEducationFilter(value)
-                    setPage(1)
+                    setEducationFilter(value);
+                    setPage(1);
                   }}
                   disabled={!educationKey || educationOptions.length === 0}
                 >
@@ -467,6 +565,28 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                   <SelectContent>
                     <SelectItem value="all">Semua Pendidikan</SelectItem>
                     {educationOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-full md:w-[220px]">
+                <Select
+                  value={genderFilter}
+                  onValueChange={(value) => {
+                    setGenderFilter(value);
+                    setPage(1);
+                  }}
+                  disabled={!genderKey || genderOptions.length === 0}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Filter gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Gender</SelectItem>
+                    {genderOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -494,19 +614,26 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                 <TableRow key={getRowKey(row, pageStart + index)}>
                   <TableCell>{pageStart + index}</TableCell>
                   {columns.map((column) => {
-                    const value = row[column.key]
-                    const text = formatValue(value)
+                    const value = row[column.key];
+                    const text = formatValue(value);
                     return (
-                      <TableCell key={column.key} className="max-w-[240px] truncate" title={text}>
+                      <TableCell
+                        key={column.key}
+                        className="max-w-[240px] truncate"
+                        title={text}
+                      >
                         {text}
                       </TableCell>
-                    )
+                    );
                   })}
                 </TableRow>
               ))}
               {pageRows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={columns.length + 1} className="py-6 text-center text-slate-500">
+                  <TableCell
+                    colSpan={columns.length + 1}
+                    className="py-6 text-center text-slate-500"
+                  >
                     Tidak ada data yang cocok.
                   </TableCell>
                 </TableRow>
@@ -515,7 +642,11 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
           </Table>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Button variant="outline" disabled={safePage <= 1} onClick={() => setPage((prev) => Math.max(1, prev - 1))}>
+            <Button
+              variant="outline"
+              disabled={safePage <= 1}
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            >
               Sebelumnya
             </Button>
             <div className="text-sm text-slate-600">
@@ -532,5 +663,5 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
