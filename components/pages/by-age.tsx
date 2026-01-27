@@ -183,24 +183,32 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
                   fill="#10b981"
                   name="PNS"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="cpns"
                   fill="#a855f7"
                   name="CPNS"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="pppk"
                   fill="#f59e0b"
                   name="PPPK"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="ki"
                   fill="#06b6d4"
                   name="KI"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -226,6 +234,8 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
                   dataKey="value"
                   label={renderCustomLabel}
                   labelLine={false}
+                  animationBegin={0}
+                  animationDuration={1000}
                 >
                   {ageCategoryData.map((entry) => (
                     <Cell key={`cell-${entry.name}`} fill={entry.color} />

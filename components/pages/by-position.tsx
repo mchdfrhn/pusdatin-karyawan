@@ -169,12 +169,16 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
                   fill="#3b82f6"
                   name="Laki-laki"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="female"
                   fill="#ec4899"
                   name="Perempuan"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -199,6 +203,8 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
                   dataKey="value"
                   label={renderPieLabel}
                   labelLine={false}
+                  animationBegin={0}
+                  animationDuration={1000}
                 >
                   {positionCategory.map((entry) => (
                     <Cell key={`cell-${entry.name}`} fill={entry.color} />

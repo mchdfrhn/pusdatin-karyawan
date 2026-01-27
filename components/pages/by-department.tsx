@@ -168,12 +168,16 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
                   fill="#3b82f6"
                   name="Laki-laki"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="female"
                   fill="#ec4899"
                   name="Perempuan"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -197,6 +201,8 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
                   dataKey="value"
                   label={renderPieLabel}
                   labelLine={false}
+                  animationBegin={0}
+                  animationDuration={1000}
                 >
                   {departmentCategory.slice(0, 8).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
