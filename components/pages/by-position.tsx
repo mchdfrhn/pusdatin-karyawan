@@ -67,6 +67,21 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
             value: getPositionValue("JFU"),
             color: "from-purple-500 to-purple-600",
           },
+          {
+            label: "Eselon II",
+            value: getPositionValue("Eselon II"),
+            color: "from-emerald-500 to-emerald-600",
+          },
+          {
+            label: "Eselon III",
+            value: getPositionValue("Eselon III"),
+            color: "from-teal-500 to-teal-600",
+          },
+          {
+            label: "Eselon IV",
+            value: getPositionValue("Eselon IV"),
+            color: "from-orange-500 to-orange-600",
+          },
         ].map((item) => (
           <div
             key={item.label}
