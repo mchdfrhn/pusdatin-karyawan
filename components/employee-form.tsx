@@ -200,7 +200,7 @@ export function EmployeeForm({
                     name="nip"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>NIP / NUP (Opsional)</FormLabel>
+                        <FormLabel>NIP</FormLabel>
                         <FormControl>
                           <Input placeholder="Nomor Induk Pegawai" {...field} />
                         </FormControl>
@@ -310,9 +310,7 @@ export function EmployeeForm({
                             <SelectItem value="PNS">PNS</SelectItem>
                             <SelectItem value="CPNS">CPNS</SelectItem>
                             <SelectItem value="PPPK">PPPK</SelectItem>
-                            <SelectItem value="KI">
-                              Karyawan Insidental
-                            </SelectItem>
+                            <SelectItem value="KI">KI</SelectItem>
                             <SelectItem value="PPnPN">PPnPN</SelectItem>
                           </SelectContent>
                         </Select>
@@ -339,10 +337,8 @@ export function EmployeeForm({
                             <SelectItem value="Struktural">
                               Struktural
                             </SelectItem>
-                            <SelectItem value="JFT">
-                              JFT (Fungsional Teman)
-                            </SelectItem>
-                            <SelectItem value="JFU">JFU (Pelaksana)</SelectItem>
+                            <SelectItem value="JFT">JFT</SelectItem>
+                            <SelectItem value="JFU">JFU</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -368,17 +364,9 @@ export function EmployeeForm({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="I.a">I.a</SelectItem>
-                            <SelectItem value="I.b">I.b</SelectItem>
-                            <SelectItem value="II.a">II.a</SelectItem>
-                            <SelectItem value="II.b">II.b</SelectItem>
-                            <SelectItem value="III.a">III.a</SelectItem>
-                            <SelectItem value="III.b">III.b</SelectItem>
-                            <SelectItem value="IV.a">IV.a</SelectItem>
-                            <SelectItem value="IV.b">IV.b</SelectItem>
-                            <SelectItem value="Non-Eselon">
-                              Non-Eselon
-                            </SelectItem>
+                            <SelectItem value="II">Eselon II</SelectItem>
+                            <SelectItem value="III">Eselon III</SelectItem>
+                            <SelectItem value="IV">Eselon IV</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -411,9 +399,36 @@ export function EmployeeForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Golongan</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Contoh: III/a" {...field} />
-                        </FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Pilih Golongan" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="I/a">I/a</SelectItem>
+                            <SelectItem value="I/b">I/b</SelectItem>
+                            <SelectItem value="I/c">I/c</SelectItem>
+                            <SelectItem value="I/d">I/d</SelectItem>
+                            <SelectItem value="II/a">II/a</SelectItem>
+                            <SelectItem value="II/b">II/b</SelectItem>
+                            <SelectItem value="II/c">II/c</SelectItem>
+                            <SelectItem value="II/d">II/d</SelectItem>
+                            <SelectItem value="III">III</SelectItem>
+                            <SelectItem value="III/a">III/a</SelectItem>
+                            <SelectItem value="III/b">III/b</SelectItem>
+                            <SelectItem value="III/c">III/c</SelectItem>
+                            <SelectItem value="III/d">III/d</SelectItem>
+                            <SelectItem value="IV/a">IV/a</SelectItem>
+                            <SelectItem value="IV/b">IV/b</SelectItem>
+                            <SelectItem value="IV/c">IV/c</SelectItem>
+                            <SelectItem value="IV/d">IV/d</SelectItem>
+                            <SelectItem value="IV/e">IV/e</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
