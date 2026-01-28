@@ -514,7 +514,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="border border-slate-200 shadow-sm overflow-hidden">
+      <Card className="border border-slate-200 shadow-sm overflow-hidden print:overflow-visible print:shadow-sm print:border-slate-200">
         <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2">
@@ -535,7 +535,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 print:hidden">
             <div className="md:col-span-5 lg:col-span-4 relative">
               <div className="absolute left-3 top-2.5 text-slate-400">
                 <Search className="h-4 w-4" />
@@ -561,7 +561,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
               >
                 <SelectTrigger className="w-full bg-slate-50 border-slate-200 focus:bg-white">
                   <div className="flex items-center gap-2 overflow-hidden">
-                    <Filter className="h-3.5 w-3.5 text-slate-500 flex-shrink-0" />
+                    <Filter className="h-3.5 w-3.5 text-slate-500 shrink-0" />
                     <span className="truncate">
                       {categoryFilter === "all"
                         ? "Kategori"
@@ -591,7 +591,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
               >
                 <SelectTrigger className="w-full bg-slate-50 border-slate-200 focus:bg-white">
                   <div className="flex items-center gap-2 overflow-hidden">
-                    <Filter className="h-3.5 w-3.5 text-slate-500 flex-shrink-0" />
+                    <Filter className="h-3.5 w-3.5 text-slate-500 shrink-0" />
                     <span className="truncate">
                       {educationFilter === "all"
                         ? "Pendidikan"
@@ -621,7 +621,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
               >
                 <SelectTrigger className="w-full bg-slate-50 border-slate-200 focus:bg-white">
                   <div className="flex items-center gap-2 overflow-hidden">
-                    <Filter className="h-3.5 w-3.5 text-slate-500 flex-shrink-0" />
+                    <Filter className="h-3.5 w-3.5 text-slate-500 shrink-0" />
                     <span className="truncate">
                       {genderFilter === "all"
                         ? "Gender"
@@ -642,23 +642,23 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+          <div className="flex items-center justify-between text-xs text-slate-500 px-1 print:hidden">
             <span>
               Menampilkan {pageStart}-{pageEnd} dari {filteredRows.length} data
             </span>
           </div>
 
-          <div className="rounded-md border border-slate-200 overflow-hidden">
-            <Table>
+          <div className="rounded-md border border-slate-200 overflow-hidden print:overflow-visible">
+            <Table className="print:text-xs">
               <TableHeader>
-                <TableRow className="bg-slate-50/80 hover:bg-slate-50 text-slate-700">
-                  <TableHead className="w-[50px] font-semibold text-center">
+                <TableRow className="bg-slate-50/80 hover:bg-slate-50 text-slate-700 print:bg-slate-100">
+                  <TableHead className="w-[50px] font-semibold text-center print:w-[30px] print:p-2">
                     No
                   </TableHead>
                   {columns.map((column) => (
                     <TableHead
                       key={column.key}
-                      className="font-semibold whitespace-nowrap"
+                      className="font-semibold whitespace-nowrap print:p-2"
                     >
                       {column.label}
                     </TableHead>
@@ -669,9 +669,9 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                 {pageRows.map((row, index) => (
                   <TableRow
                     key={getRowKey(row, pageStart + index)}
-                    className="hover:bg-blue-50/50 transition-colors"
+                    className="hover:bg-blue-50/50 transition-colors print-break-inside-avoid"
                   >
-                    <TableCell className="text-center text-slate-500 text-xs">
+                    <TableCell className="text-center text-slate-500 text-xs print:p-2">
                       {pageStart + index}
                     </TableCell>
                     {columns.map((column) => {
@@ -680,7 +680,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                       return (
                         <TableCell
                           key={column.key}
-                          className="max-w-[200px] truncate text-slate-700 text-sm whitespace-nowrap"
+                          className="max-w-[200px] truncate text-slate-700 text-sm whitespace-nowrap print:whitespace-normal print:break-words print:max-w-none print:p-2 print:text-xs"
                           title={text}
                         >
                           {text}
@@ -708,7 +708,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
             </Table>
           </div>
 
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between pt-2 print:hidden">
             <Button
               variant="outline"
               size="sm"

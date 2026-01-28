@@ -45,7 +45,7 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 print:grid-cols-3">
         {[
           {
             label: "Total Pegawai",
@@ -74,8 +74,8 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border border-slate-200 shadow-sm">
+      <div className="grid gap-6 lg:grid-cols-2 print:block">
+        <Card className="border border-slate-200 shadow-sm print:mb-6 print-break-inside-avoid">
           <CardHeader>
             <CardTitle>Distribusi Gender per Kelompok Usia</CardTitle>
           </CardHeader>
@@ -168,7 +168,7 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 shadow-sm">
+        <Card className="border border-slate-200 shadow-sm print:mb-6 print-break-inside-avoid">
           <CardHeader>
             <CardTitle>Komposisi Gender</CardTitle>
           </CardHeader>
@@ -212,15 +212,18 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
       </div>
 
       {/* Gender Statistics by Age */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader>
+      <Card className="border border-slate-200 shadow-sm print:break-inside-auto print-break-before">
+        <CardHeader className="print:hidden">
           <CardTitle>Detail Distribusi Gender per Kelompok Usia</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="hidden print:block mb-4 font-bold text-lg print-break-after-avoid">
+            Detail Distribusi Gender per Kelompok Usia
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+              <thead className="print-break-after-avoid">
+                <tr className="border-b border-slate-200 bg-slate-50 print-break-inside-avoid">
                   <th className="px-4 py-3 text-left font-semibold text-slate-700">
                     Kelompok Usia
                   </th>
@@ -239,7 +242,7 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
                 {genderAgeData.map((row) => (
                   <tr
                     key={row.age}
-                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors print-break-inside-avoid"
                   >
                     <td className="px-4 py-3 font-medium text-slate-700">
                       {row.age}

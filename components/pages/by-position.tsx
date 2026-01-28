@@ -50,7 +50,7 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 print:grid-cols-3">
         {[
           {
             label: "Total Pegawai",
@@ -94,16 +94,16 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border border-slate-200 shadow-sm">
+      <div className="grid gap-6 lg:grid-cols-2 print:block">
+        <Card className="border border-slate-200 shadow-sm print-break-inside-avoid print:mb-6">
           <CardHeader>
             <CardTitle>Distribusi Gender per Jabatan</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250}>
               <BarChart data={positionData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="position" />
+                <XAxis dataKey="position" fontSize={11} interval={0} />
                 <YAxis />
                 <Tooltip
                   contentStyle={{
@@ -185,12 +185,12 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 shadow-sm">
+        <Card className="border border-slate-200 shadow-sm print-break-inside-avoid print:mb-6">
           <CardHeader>
             <CardTitle>Komposisi Jabatan</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Legend />
                 <Pie
@@ -229,15 +229,18 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
       </div>
 
       {/* Table */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader>
+      <Card className="border border-slate-200 shadow-sm print:break-inside-auto print-break-before">
+        <CardHeader className="print:hidden">
           <CardTitle>Detail Distribusi Gender per Jabatan</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="hidden print:block mb-4 font-bold text-lg print-break-after-avoid">
+            Detail Distribusi Gender per Jabatan
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+              <thead className="print-break-after-avoid">
+                <tr className="border-b border-slate-200 bg-slate-50 print-break-inside-avoid">
                   <th className="px-4 py-3 text-left font-semibold text-slate-700">
                     Jabatan
                   </th>
@@ -249,6 +252,9 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
                   </th>
                   <th className="px-4 py-3 text-center font-semibold text-slate-700">
                     Total
+                  </th>
+                  <th className="px-4 py-3 text-center font-semibold text-slate-700">
+                    % dari Total
                   </th>
                 </tr>
               </thead>
@@ -269,6 +275,13 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
                     </td>
                     <td className="px-4 py-3 text-center font-semibold text-blue-600">
                       {row.male + row.female}
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-600">
+                      {(
+                        ((row.male + row.female) / summary.totalEmployees) *
+                        100
+                      ).toFixed(1)}
+                      %
                     </td>
                   </tr>
                 ))}
