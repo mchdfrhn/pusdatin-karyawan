@@ -1,5 +1,4 @@
-"use client";
-
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { EmployeeStats } from "@/lib/data/employee-stats";
 import {
@@ -14,6 +13,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Sector,
 } from "recharts";
 
 type EmployeeByGenderProps = {
@@ -22,6 +22,53 @@ type EmployeeByGenderProps = {
 
 export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
   const { genderAgeData, genderCategory, summary } = stats;
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+
+  const renderActiveShape = (props: any) => {
+    const {
+      cx,
+      cy,
+      innerRadius,
+      outerRadius,
+      startAngle,
+      endAngle,
+      fill,
+      payload,
+      percent,
+      value,
+    } = props;
+
+    return (
+      <g>
+        <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+          {payload.name}
+        </text>
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius + 10}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={fill}
+          filter="drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.15))"
+        />
+        <Sector
+          cx={cx}
+          cy={cy}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          innerRadius={outerRadius + 12}
+          outerRadius={outerRadius + 14}
+          fill={fill}
+        />
+      </g>
+    );
+  };
 
   const renderCustomLabel = (entry: any) => {
     return `${entry.value}`;
@@ -88,7 +135,7 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
                 <Tooltip
                   itemStyle={{ fontSize: "12px" }}
                   labelStyle={{ fontWeight: "bold", marginBottom: "5px" }}
-                  cursor={{ fill: "transparent" }}
+                  cursor={{ fill: "#f1f5f9" }}
                   content={({
                     active,
                     payload,
@@ -177,6 +224,10 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
               <PieChart>
                 <Legend />
                 <Pie
+                  activeIndex={activeIndex}
+                  activeShape={renderActiveShape}
+                  onMouseEnter={onPieEnter}
+                  onMouseLeave={() => setActiveIndex(-1)}
                   data={genderCategory}
                   cx="50%"
                   cy="50%"

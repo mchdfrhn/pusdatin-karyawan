@@ -10,6 +10,7 @@ import { EmployeeByDepartment } from "@/components/pages/by-department";
 import { EmployeeTable } from "@/components/pages/employee-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEmployeeStats } from "@/hooks/use-employee-stats";
 
 const tabs = [
@@ -37,14 +38,43 @@ export default function Home() {
 
     if (status === "loading") {
       return (
-        <Card className="border border-slate-200 shadow-sm">
-          <CardHeader>
-            <CardTitle>Data Pegawai</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-slate-600">
-            Memuat data dari database...
-          </CardContent>
-        </Card>
+        <div className="space-y-6 animate-in fade-in duration-500">
+          {/* Summary Cards Skeleton */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="border border-slate-200 shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-4 rounded-full" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-16 mb-2" />
+                  <Skeleton className="h-3 w-32" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Charts Skeleton */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <Card className="col-span-4 border border-slate-200 shadow-sm">
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+              </CardHeader>
+              <CardContent className="pl-2">
+                <Skeleton className="h-[350px] w-full rounded-md bg-slate-100" />
+              </CardContent>
+            </Card>
+            <Card className="col-span-3 border border-slate-200 shadow-sm">
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-[350px] w-full rounded-full bg-slate-100 mx-auto" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       );
     }
 

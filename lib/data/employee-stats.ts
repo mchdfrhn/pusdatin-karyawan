@@ -185,6 +185,13 @@ const FIELD_ALIASES = {
     "gol_ruang",
   ],
   eselon: ["eselon"],
+  jenisJabatan: [
+    "jenis_jabatan",
+    "jenisjabatan",
+    "tipe_jabatan",
+    "tipejabatan",
+    "kelompok_jabatan",
+  ],
 } as const;
 
 const FIELD_SETS = {
@@ -196,6 +203,7 @@ const FIELD_SETS = {
   position: new Set(FIELD_ALIASES.position),
   department: new Set(FIELD_ALIASES.department),
   eselon: new Set(FIELD_ALIASES.eselon),
+  jenisJabatan: new Set(FIELD_ALIASES.jenisJabatan),
 };
 
 const FIELD_OVERRIDES = {
@@ -207,6 +215,7 @@ const FIELD_OVERRIDES = {
   position: process.env.NEXT_PUBLIC_EMPLOYEE_FIELD_POSITION,
   department: process.env.NEXT_PUBLIC_EMPLOYEE_FIELD_DEPARTMENT,
   eselon: "eselon",
+  jenisJabatan: "jenis_jabatan",
 };
 
 export type RawRow = Record<string, unknown>;
@@ -630,16 +639,91 @@ function normalizeLabel(value: unknown): string | null {
   return text ? text : null;
 }
 
-function normalizePositionGroup(value: unknown, eselonValue?: unknown): string {
-  // 1. Trust the 'eselon' column if it exists
-  if (eselonValue) {
-    const eselon = String(eselonValue).trim().toUpperCase();
-    if (eselon === "II" || eselon.includes("II")) return "Eselon II";
-    if (eselon === "III" || eselon.includes("III")) return "Eselon III";
-    if (eselon === "IV" || eselon.includes("IV")) return "Eselon IV";
+function normalizePositionGroup(
+  value: unknown,
+  eselonValue?: unknown,
+  jenisJabatanValue?: unknown,
+): string | null {
+  // 1. Check 'jenis_jabatan' column first
+  if (jenisJabatanValue) {
+    const jenis = String(jenisJabatanValue).trim();
+
+    // If Struktural, use Eselon
+    if (
+      matchAlias(jenis, "struktural") ||
+      jenis.toLowerCase().includes("struktural")
+    ) {
+      if (eselonValue) {
+        const eselon = String(eselonValue).trim().toUpperCase();
+        // Check for III first (as it contains II)
+        if (
+          eselon === "III" ||
+          eselon.startsWith("III") ||
+          eselon.includes("ESELON III")
+        )
+          return "Eselon III";
+        if (
+          eselon === "II" ||
+          eselon.startsWith("II") ||
+          eselon.includes("ESELON II")
+        )
+          return "Eselon II";
+        if (
+          eselon === "IV" ||
+          eselon.startsWith("IV") ||
+          eselon.includes("ESELON IV")
+        )
+          return "Eselon IV";
+
+        // Fallback for Struktural but unknown Eselon
+        return "Struktural (Unknown Eselon)";
+      }
+      return "Struktural (No Eselon)";
+    }
+
+    // Else use the Jenis Jabatan value (JFT, JFU, etc.)
+    if (
+      matchAlias(jenis, "jft") ||
+      jenis.toLowerCase().includes("fungsional tertentu")
+    )
+      return "JFT";
+    if (
+      matchAlias(jenis, "jfu") ||
+      jenis.toLowerCase().includes("fungsional umum") ||
+      jenis.toLowerCase().includes("pelaksana")
+    )
+      return "JFU";
+
+    // If explicit value, return it properly formatted
+    return jenis;
   }
 
-  if (!value) return "JFU"; // Default to JFU if missing
+  // --- Fallback to old logic if jenis_jabatan is missing ---
+
+  // 1. Trust the 'eselon' column if it exists and looks like Roman numerals
+  if (eselonValue) {
+    const eselon = String(eselonValue).trim().toUpperCase();
+    if (
+      eselon === "III" ||
+      eselon.startsWith("III") ||
+      eselon.includes("ESELON III")
+    )
+      return "Eselon III";
+    if (
+      eselon === "II" ||
+      eselon.startsWith("II") ||
+      eselon.includes("ESELON II")
+    )
+      return "Eselon II";
+    if (
+      eselon === "IV" ||
+      eselon.startsWith("IV") ||
+      eselon.includes("ESELON IV")
+    )
+      return "Eselon IV";
+  }
+
+  if (!value) return null; // Default to null if missing
   const text = String(value).trim().toLowerCase();
 
   // 2. Strict Position Matching (only if explicit 'eselon' in title AND column was empty)
@@ -673,7 +757,7 @@ function normalizePositionGroup(value: unknown, eselonValue?: unknown): string {
   }
 
   // 4. Default Fallback
-  return "JFU";
+  return null;
 }
 
 export function buildStatsFromRows(rows: RawRow[]): EmployeeStats {
@@ -775,22 +859,34 @@ export function buildStatsFromRows(rows: RawRow[]): EmployeeStats {
       FIELD_SETS.eselon,
       FIELD_OVERRIDES.eselon,
     );
+    const jenisJabatanValue = pickField(
+      row,
+      FIELD_SETS.jenisJabatan,
+      FIELD_OVERRIDES.jenisJabatan,
+    );
 
     if (gender) {
-      const group = normalizePositionGroup(positionLabel, eselonValue);
-      const key = group.toLowerCase();
+      const group = normalizePositionGroup(
+        positionLabel,
+        eselonValue,
+        jenisJabatanValue,
+      );
 
-      const existing = positionMap.get(key) ?? {
-        label: group,
-        male: 0,
-        female: 0,
-      };
-      if (gender === "male") {
-        existing.male += 1;
-      } else {
-        existing.female += 1;
+      if (group) {
+        const key = group.toLowerCase();
+
+        const existing = positionMap.get(key) ?? {
+          label: group,
+          male: 0,
+          female: 0,
+        };
+        if (gender === "male") {
+          existing.male += 1;
+        } else {
+          existing.female += 1;
+        }
+        positionMap.set(key, existing);
       }
-      positionMap.set(key, existing);
     }
 
     const departmentLabel = normalizeLabel(
