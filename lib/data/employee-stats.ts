@@ -643,7 +643,7 @@ function normalizePositionGroup(
   value: unknown,
   eselonValue?: unknown,
   jenisJabatanValue?: unknown,
-): string {
+): string | null {
   // 1. Check 'jenis_jabatan' column first
   if (jenisJabatanValue) {
     const jenis = String(jenisJabatanValue).trim();
@@ -723,7 +723,7 @@ function normalizePositionGroup(
       return "Eselon IV";
   }
 
-  if (!value) return "JFU"; // Default to JFU if missing
+  if (!value) return null; // Default to null if missing
   const text = String(value).trim().toLowerCase();
 
   // 2. Strict Position Matching (only if explicit 'eselon' in title AND column was empty)
@@ -757,7 +757,7 @@ function normalizePositionGroup(
   }
 
   // 4. Default Fallback
-  return "JFU";
+  return null;
 }
 
 export function buildStatsFromRows(rows: RawRow[]): EmployeeStats {
@@ -871,19 +871,22 @@ export function buildStatsFromRows(rows: RawRow[]): EmployeeStats {
         eselonValue,
         jenisJabatanValue,
       );
-      const key = group.toLowerCase();
 
-      const existing = positionMap.get(key) ?? {
-        label: group,
-        male: 0,
-        female: 0,
-      };
-      if (gender === "male") {
-        existing.male += 1;
-      } else {
-        existing.female += 1;
+      if (group) {
+        const key = group.toLowerCase();
+
+        const existing = positionMap.get(key) ?? {
+          label: group,
+          male: 0,
+          female: 0,
+        };
+        if (gender === "male") {
+          existing.male += 1;
+        } else {
+          existing.female += 1;
+        }
+        positionMap.set(key, existing);
       }
-      positionMap.set(key, existing);
     }
 
     const departmentLabel = normalizeLabel(
