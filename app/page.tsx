@@ -14,7 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEmployeeStats } from "@/hooks/use-employee-stats";
 import { EmployeeForm } from "@/components/employee-form";
 import { Plus } from "lucide-react";
-import { toast } from "sonner"; // Import toast
+import { toast } from "sonner";
+import { type EmployeeFormValues } from "@/app/actions";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard" },
@@ -30,13 +31,16 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<
+    EmployeeFormValues | undefined
+  >(undefined);
+  const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const { stats, rows, status, error } = useEmployeeStats();
 
   useEffect(() => {
     // Check for success message from sessionStorage after reload
     const storedMessage = sessionStorage.getItem("toast_message");
     if (storedMessage) {
-      // Use a small timeout to ensure the Toaster is ready
       setTimeout(() => {
         toast.success(storedMessage);
       }, 100);
@@ -48,6 +52,39 @@ export default function Home() {
     window.print();
   };
 
+  const handleEdit = (row: any) => {
+    // Map row data to form values
+    const formData: EmployeeFormValues = {
+      nama: row.nama_lengkap || "",
+      nik: row.nik || "",
+      nip: row.nip || "",
+
+      tanggal_lahir: row.tanggal_lahir || "",
+      jenis_kelamin: (() => {
+        const val = String(row.jenis_kelamin || "").toLowerCase();
+        if (
+          val.startsWith("p") ||
+          val.includes("female") ||
+          val.includes("wanita")
+        )
+          return "Perempuan";
+        return "Laki-laki";
+      })(),
+      email: row.email || "",
+      status_kepegawaian: (row.kategori as any) || "PNS",
+      jenis_jabatan: (row.jenis_jabatan as any) || "Struktural",
+      eselon: row.eselon || undefined,
+      nama_jabatan: row.jabatan || "",
+      golongan: row.golongan || "",
+      bidang: row.bidang || "",
+      pendidikan_terakhir: (row.pendidikan as any) || "S1-D4",
+    };
+
+    setEditingEmployee(formData);
+    setEditingId(row.id);
+    setIsAddEmployeeOpen(true);
+  };
+
   const renderContent = () => {
     if (activeTab === "tabel") {
       return (
@@ -56,6 +93,7 @@ export default function Home() {
           status={status}
           error={error}
           isEditMode={isEditMode}
+          onEdit={handleEdit}
         />
       );
     }
@@ -63,7 +101,6 @@ export default function Home() {
     if (status === "loading") {
       return (
         <div className="space-y-6 animate-in fade-in duration-500">
-          {/* Summary Cards Skeleton */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} className="border border-slate-200 shadow-sm">
@@ -78,8 +115,6 @@ export default function Home() {
               </Card>
             ))}
           </div>
-
-          {/* Charts Skeleton */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
             <Card className="col-span-4 border border-slate-200 shadow-sm">
               <CardHeader>
@@ -148,11 +183,19 @@ export default function Home() {
     <main className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 print:bg-white">
       <EmployeeForm
         open={isAddEmployeeOpen}
-        onOpenChange={setIsAddEmployeeOpen}
+        onOpenChange={(open) => {
+          setIsAddEmployeeOpen(open);
+          if (!open) {
+            setEditingEmployee(undefined);
+            setEditingId(undefined);
+          }
+        }}
         onSuccess={(message) => {
           sessionStorage.setItem("toast_message", message);
           window.location.reload();
         }}
+        initialData={editingEmployee}
+        employeeId={editingId}
       />
 
       {/* Header */}

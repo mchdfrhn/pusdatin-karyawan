@@ -32,7 +32,11 @@ import {
 } from "@/components/ui/sheet";
 import { useEffect, useTransition } from "react";
 import { toast } from "sonner";
-import { addEmployee } from "@/app/actions";
+import {
+  addEmployee,
+  updateEmployee,
+  type EmployeeFormValues,
+} from "@/app/actions";
 
 const formSchema = z.object({
   // Identitas
@@ -46,7 +50,7 @@ const formSchema = z.object({
     })
     .regex(/^\d+$/, { message: "NIK harus berupa angka." }),
   nip: z.string().optional(),
-  tempat_lahir: z.string().optional(),
+
   tanggal_lahir: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Tanggal lahir tidak valid.",
   }),
@@ -68,8 +72,6 @@ const formSchema = z.object({
   nama_jabatan: z.string().min(1, { message: "Nama jabatan harus diisi." }),
   golongan: z.string().optional(),
   bidang: z.string().optional(),
-  unit_kerja: z.string().min(1, { message: "Unit kerja harus diisi." }),
-  instansi: z.string().optional(),
 
   // Pendidikan
   pendidikan_terakhir: z.enum(["SLTA", "D1-D3", "S1-D4", "S2", "S3"], {
@@ -77,37 +79,66 @@ const formSchema = z.object({
   }),
 });
 
-type EmployeeFormValues = z.infer<typeof formSchema>;
-
 interface EmployeeFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: (message: string) => void;
+  initialData?: EmployeeFormValues;
+  employeeId?: string;
 }
 
 export function EmployeeForm({
   open,
   onOpenChange,
   onSuccess,
+  initialData,
+  employeeId,
 }: EmployeeFormProps) {
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       nama: "",
       nik: "",
       nip: "",
-      tempat_lahir: "",
+
       tanggal_lahir: "",
+      jenis_kelamin: "Laki-laki",
       email: "",
+      status_kepegawaian: "PNS",
+      jenis_jabatan: "Struktural",
       nama_jabatan: "",
       golongan: "",
       bidang: "",
-      unit_kerja: "",
-      instansi: "",
+
+      pendidikan_terakhir: "S1-D4",
     },
   });
+
+  // Reset form when initialData changes or open state changes
+  useEffect(() => {
+    if (open) {
+      form.reset(
+        initialData || {
+          nama: "",
+          nik: "",
+          nip: "",
+
+          tanggal_lahir: "",
+          jenis_kelamin: "Laki-laki",
+          email: "",
+          status_kepegawaian: "PNS",
+          jenis_jabatan: "Struktural",
+          nama_jabatan: "",
+          golongan: "",
+          bidang: "",
+
+          pendidikan_terakhir: "S1-D4",
+        },
+      );
+    }
+  }, [open, initialData, form]);
 
   // Watch jenis_jabatan to conditionally show/hide/reset eselon
   const jenisJabatan = form.watch("jenis_jabatan");
@@ -120,7 +151,12 @@ export function EmployeeForm({
 
   function handleSubmit(data: EmployeeFormValues) {
     startTransition(async () => {
-      const result = await addEmployee(data);
+      let result;
+      if (employeeId) {
+        result = await updateEmployee(employeeId, data);
+      } else {
+        result = await addEmployee(data);
+      }
 
       if (result.success) {
         const message = result.message || "Data pegawai berhasil disimpan";
@@ -128,7 +164,8 @@ export function EmployeeForm({
         if (onSuccess) {
           onSuccess(message);
         } else {
-          toast.success(message);
+          sessionStorage.setItem("toast_message", message);
+          window.location.reload();
         }
 
         onOpenChange(false);
@@ -144,10 +181,12 @@ export function EmployeeForm({
       <SheetContent className="w-[400px] sm:w-[540px] p-0 flex flex-col h-full bg-white">
         <SheetHeader className="px-6 py-4 border-b border-slate-100 flex-none bg-white z-10">
           <SheetTitle className="text-xl font-bold text-slate-900">
-            Tambah Pegawai Baru
+            {employeeId ? "Ubah Data Pegawai" : "Tambah Pegawai Baru"}
           </SheetTitle>
           <SheetDescription className="text-slate-500">
-            Isi formulir berikut untuk menambahkan data pegawai ke dalam sistem.
+            {employeeId
+              ? "Perbarui informasi data pegawai."
+              : "Isi formulir berikut untuk menambahkan data pegawai ke dalam sistem."}
           </SheetDescription>
         </SheetHeader>
 
@@ -175,6 +214,20 @@ export function EmployeeForm({
                           placeholder="Nama lengkap beserta gelar"
                           {...field}
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="bidang"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bidang</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nama Bidang" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -215,19 +268,6 @@ export function EmployeeForm({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="tempat_lahir"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tempat Lahir</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Kota kelahiran" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <FormField
                     control={form.control}
                     name="tanggal_lahir"
@@ -437,48 +477,6 @@ export function EmployeeForm({
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="bidang"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Bidang</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Nama Bidang" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="unit_kerja"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Unit Kerja</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Nama Unit Kerja" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="instansi"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Instansi</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Nama Instansi" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
               </div>
 
@@ -536,7 +534,11 @@ export function EmployeeForm({
             className="bg-blue-600 hover:bg-blue-700"
             disabled={isPending}
           >
-            {isPending ? "Menyimpan..." : "Simpan Data"}
+            {isPending
+              ? "Menyimpan..."
+              : employeeId
+                ? "Simpan Perubahan"
+                : "Simpan Data"}
           </Button>
         </SheetFooter>
       </SheetContent>

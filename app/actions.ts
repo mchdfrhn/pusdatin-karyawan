@@ -7,7 +7,7 @@ export type EmployeeFormValues = {
   nama: string;
   nik: string;
   nip?: string;
-  tempat_lahir?: string;
+
   tanggal_lahir: string;
   jenis_kelamin: "Laki-laki" | "Perempuan";
   email: string;
@@ -17,8 +17,7 @@ export type EmployeeFormValues = {
   nama_jabatan: string;
   golongan?: string;
   bidang?: string;
-  unit_kerja: string;
-  instansi?: string;
+
   pendidikan_terakhir: "SLTA" | "D1-D3" | "S1-D4" | "S2" | "S3";
 };
 
@@ -31,12 +30,13 @@ export async function addEmployee(data: EmployeeFormValues) {
     nama_lengkap: data.nama,
     nik: data.nik,
     nip: data.nip || null,
+
     tanggal_lahir: data.tanggal_lahir,
     jenis_kelamin: data.jenis_kelamin,
     email: data.email,
     kategori: data.status_kepegawaian,
     jenis_jabatan: data.jenis_jabatan,
-    eselon: data.eselon === "Non-Eselon" ? null : data.eselon,
+    eselon: data.jenis_jabatan === "Struktural" ? data.eselon || null : null,
     jabatan: data.nama_jabatan,
     golongan: data.golongan,
     bidang: data.bidang,
@@ -98,6 +98,60 @@ export async function deleteEmployee(
     return {
       success: false,
       error: "Terjadi kesalahan yang tidak terduga saat menghapus data.",
+    };
+  }
+}
+
+export async function updateEmployee(id: string, data: EmployeeFormValues) {
+  const tableName =
+    process.env.NEXT_PUBLIC_SUPABASE_EMPLOYEE_TABLE || "pegawai";
+
+  // Map form values to database columns
+  const payload = {
+    nama_lengkap: data.nama,
+    nik: data.nik,
+    nip: data.nip || null,
+
+    tanggal_lahir: data.tanggal_lahir,
+    jenis_kelamin: data.jenis_kelamin,
+    email: data.email,
+    kategori: data.status_kepegawaian,
+    jenis_jabatan: data.jenis_jabatan,
+    eselon: data.jenis_jabatan === "Struktural" ? data.eselon || null : null,
+    jabatan: data.nama_jabatan,
+    golongan: data.golongan,
+    bidang: data.bidang,
+    pendidikan: data.pendidikan_terakhir,
+  };
+
+  try {
+    const { error } = await supabaseAdmin
+      .from(tableName)
+      .update(payload)
+      .eq("id", id);
+
+    if (error) {
+      console.error("Supabase update error:", error);
+      // Handle duplicate unique constraint
+      if (error.code === "23505") {
+        return {
+          success: false,
+          error: "Gagal: NIK atau NIP sudah terdaftar.",
+        };
+      }
+      return { success: false, error: `Gagal: ${error.message}` };
+    }
+
+    revalidatePath("/");
+    return {
+      success: true,
+      message: `Data pegawai ${payload.nama_lengkap} berhasil diperbarui.`,
+    };
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return {
+      success: false,
+      error: "Terjadi kesalahan yang tidak terduga saat memperbarui data.",
     };
   }
 }

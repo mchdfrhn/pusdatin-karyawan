@@ -10,6 +10,7 @@ import {
   FileSpreadsheet,
   Plus,
   Trash2,
+  Pencil,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -49,6 +50,7 @@ type EmployeeTableProps = {
   status: "loading" | "ready" | "error";
   error: string | null;
   isEditMode?: boolean;
+  onEdit?: (row: RawRow) => void;
 };
 
 type Column = {
@@ -300,6 +302,7 @@ export function EmployeeTable({
   status,
   error,
   isEditMode = false,
+  onEdit,
 }: EmployeeTableProps) {
   const [search, setSearch] = useState("");
   const [educationFilter, setEducationFilter] = useState("all");
@@ -811,26 +814,36 @@ export function EmployeeTable({
                     })}
                     {isEditMode && (
                       <TableCell className="text-center print:hidden">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={isDeleting}
-                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => {
-                            // Try to find the best ID. 'id' is standard, 'uuid' might exist, or 'nip'
-                            const id =
-                              (row.id as string) ||
-                              (row.uuid as string) ||
-                              (row.nip as string);
-                            if (id) setDeleteId(String(id));
-                            else
-                              toast.error(
-                                "Tidak dapat menemukan ID untuk pegawai ini.",
-                              );
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center justify-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                            onClick={() => onEdit?.(row)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={isDeleting}
+                            className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => {
+                              // Try to find the best ID. 'id' is standard, 'uuid' might exist, or 'nip'
+                              const id =
+                                (row.id as string) ||
+                                (row.uuid as string) ||
+                                (row.nip as string);
+                              if (id) setDeleteId(String(id));
+                              else
+                                toast.error(
+                                  "Tidak dapat menemukan ID untuk pegawai ini.",
+                                );
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     )}
                   </TableRow>
