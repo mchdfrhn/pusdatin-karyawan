@@ -38,4 +38,4 @@ next-env.d.ts
 
 # data
 *.csv
-*.sql
+insert-data.sql
