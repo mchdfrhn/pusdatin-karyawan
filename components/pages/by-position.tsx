@@ -50,47 +50,39 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3 print:grid-cols-3">
-        {[
-          {
-            label: "Total Pegawai",
-            value: summary.totalEmployees,
-            color: "from-blue-500 to-blue-600",
-          },
-          {
-            label: "JFT",
-            value: getPositionValue("JFT"),
-            color: "from-cyan-500 to-cyan-600",
-          },
-          {
-            label: "JFU",
-            value: getPositionValue("JFU"),
-            color: "from-purple-500 to-purple-600",
-          },
-          {
-            label: "Eselon II",
-            value: getPositionValue("Eselon II"),
-            color: "from-emerald-500 to-emerald-600",
-          },
-          {
-            label: "Eselon III",
-            value: getPositionValue("Eselon III"),
-            color: "from-teal-500 to-teal-600",
-          },
-          {
-            label: "Eselon IV",
-            value: getPositionValue("Eselon IV"),
-            color: "from-orange-500 to-orange-600",
-          },
-        ].map((item) => (
-          <div
-            key={item.label}
-            className={`rounded-lg bg-gradient-to-br ${item.color} p-4 text-white shadow-md`}
-          >
-            <p className="text-xs font-medium opacity-90">{item.label}</p>
-            <p className="mt-2 text-3xl font-bold">{item.value}</p>
+      <div className="grid gap-4 md:grid-cols-4 print:grid-cols-4">
+        <div className="rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 p-4 text-white shadow-md">
+          <p className="text-xs font-medium opacity-90">Total Pegawai</p>
+          <p className="mt-2 text-3xl font-bold">{summary.totalEmployees}</p>
+        </div>
+
+        <div className="rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 p-4 text-white shadow-md">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-medium opacity-90">Struktural</p>
+              <p className="mt-2 text-3xl font-bold">
+                {getPositionValue("Eselon II") +
+                  getPositionValue("Eselon III") +
+                  getPositionValue("Eselon IV")}
+              </p>
+            </div>
+            <div className="text-xs text-indigo-100 space-y-1 text-right">
+              <p>Eselon II: {getPositionValue("Eselon II")}</p>
+              <p>Eselon III: {getPositionValue("Eselon III")}</p>
+              <p>Eselon IV: {getPositionValue("Eselon IV")}</p>
+            </div>
           </div>
-        ))}
+        </div>
+
+        <div className="rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 p-4 text-white shadow-md">
+          <p className="text-xs font-medium opacity-90">JFT</p>
+          <p className="mt-2 text-3xl font-bold">{getPositionValue("JFT")}</p>
+        </div>
+
+        <div className="rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 p-4 text-white shadow-md">
+          <p className="text-xs font-medium opacity-90">JFU</p>
+          <p className="mt-2 text-3xl font-bold">{getPositionValue("JFU")}</p>
+        </div>
       </div>
 
       {/* Charts */}
