@@ -711,16 +711,16 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
           </div>
 
           <div className="rounded-md border border-slate-200 overflow-hidden print:overflow-visible">
-            <Table className="print:text-xs">
+            <Table className="print:text-[10px] print:w-full">
               <TableHeader>
-                <TableRow className="bg-slate-50/80 hover:bg-slate-50 text-slate-700 print:bg-slate-100">
-                  <TableHead className="w-[50px] font-semibold text-center print:w-[30px] print:p-2">
+                <TableRow className="bg-slate-50/80 hover:bg-slate-50 text-slate-700 print:bg-slate-100 print:text-[10px]">
+                  <TableHead className="w-[50px] font-semibold text-center print:w-[30px] print:p-1 print:h-auto">
                     No
                   </TableHead>
                   {columns.map((column) => (
                     <TableHead
                       key={column.key}
-                      className="font-semibold whitespace-nowrap print:p-2"
+                      className="font-semibold whitespace-nowrap print:p-1 print:h-auto print:whitespace-normal print:align-top"
                     >
                       {column.label}
                     </TableHead>
@@ -733,7 +733,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                     key={getRowKey(row, pageStart + index)}
                     className="hover:bg-blue-50/50 transition-colors print-break-inside-avoid"
                   >
-                    <TableCell className="text-center text-slate-500 text-xs print:p-2">
+                    <TableCell className="text-center text-slate-500 text-xs print:text-[10px] print:p-1 print:align-top">
                       {pageStart + index}
                     </TableCell>
                     {columns.map((column) => {
@@ -742,7 +742,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                       return (
                         <TableCell
                           key={column.key}
-                          className="max-w-[200px] truncate text-slate-700 text-sm whitespace-nowrap print:whitespace-normal print:break-words print:max-w-none print:p-2 print:text-xs"
+                          className="max-w-[200px] truncate text-slate-700 text-sm whitespace-nowrap print:whitespace-normal print:break-words print:max-w-none print:p-1 print:text-[10px] print:align-top"
                           title={text}
                         >
                           {text}
