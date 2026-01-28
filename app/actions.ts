@@ -30,7 +30,7 @@ export async function addEmployee(data: EmployeeFormValues) {
   const payload = {
     nama_lengkap: data.nama,
     nik: data.nik,
-    nip: data.nip,
+    nip: data.nip || null,
     tanggal_lahir: data.tanggal_lahir,
     jenis_kelamin: data.jenis_kelamin,
     email: data.email,
@@ -49,13 +49,26 @@ export async function addEmployee(data: EmployeeFormValues) {
 
     if (error) {
       console.error("Supabase insert error:", error);
-      return { success: false, error: error.message };
+      // Handle duplicate unique constraint (e.g., NIK or NIP already exists)
+      if (error.code === "23505") {
+        return {
+          success: false,
+          error: "Gagal: NIK atau NIP sudah terdaftar.",
+        };
+      }
+      return { success: false, error: `Gagal: ${error.message}` };
     }
 
     revalidatePath("/"); // Revalidate the home page to show new data
-    return { success: true };
+    return {
+      success: true,
+      message: `Pegawai ${payload.nama_lengkap} berhasil ditambahkan.`,
+    };
   } catch (err) {
     console.error("Unexpected error:", err);
-    return { success: false, error: "An unexpected error occurred." };
+    return {
+      success: false,
+      error: "Terjadi kesalahan yang tidak terduga saat menyimpan data.",
+    };
   }
 }

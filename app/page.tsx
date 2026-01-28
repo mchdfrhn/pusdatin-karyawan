@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EmployeeDashboard } from "@/components/pages/dashboard";
 import { EmployeeByAge } from "@/components/pages/by-age";
 import { EmployeeByGender } from "@/components/pages/by-gender";
@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEmployeeStats } from "@/hooks/use-employee-stats";
 import { EmployeeForm } from "@/components/employee-form";
 import { Plus } from "lucide-react";
+import { toast } from "sonner"; // Import toast
 
 const tabs = [
   { id: "dashboard", label: "Dashboard" },
@@ -29,6 +30,18 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
   const { stats, rows, status, error } = useEmployeeStats();
+
+  useEffect(() => {
+    // Check for success message from sessionStorage after reload
+    const storedMessage = sessionStorage.getItem("toast_message");
+    if (storedMessage) {
+      // Use a small timeout to ensure the Toaster is ready
+      setTimeout(() => {
+        toast.success(storedMessage);
+      }, 100);
+      sessionStorage.removeItem("toast_message");
+    }
+  }, []);
 
   const handlePrintPDF = () => {
     window.print();
@@ -128,6 +141,10 @@ export default function Home() {
       <EmployeeForm
         open={isAddEmployeeOpen}
         onOpenChange={setIsAddEmployeeOpen}
+        onSuccess={(message) => {
+          sessionStorage.setItem("toast_message", message);
+          window.location.reload();
+        }}
       />
 
       {/* Header */}

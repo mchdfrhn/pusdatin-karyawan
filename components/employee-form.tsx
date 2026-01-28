@@ -82,13 +82,13 @@ type EmployeeFormValues = z.infer<typeof formSchema>;
 interface EmployeeFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit?: (data: EmployeeFormValues) => void;
+  onSuccess?: (message: string) => void;
 }
 
 export function EmployeeForm({
   open,
   onOpenChange,
-  onSubmit,
+  onSuccess,
 }: EmployeeFormProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -123,10 +123,14 @@ export function EmployeeForm({
       const result = await addEmployee(data);
 
       if (result.success) {
-        toast.success("Data pegawai berhasil disimpan");
-        if (onSubmit) {
-          onSubmit(data);
+        const message = result.message || "Data pegawai berhasil disimpan";
+
+        if (onSuccess) {
+          onSuccess(message);
+        } else {
+          toast.success(message);
         }
+
         onOpenChange(false);
         form.reset();
       } else {
