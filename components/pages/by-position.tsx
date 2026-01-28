@@ -139,7 +139,7 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
             <CardTitle>Distribusi Gender per Jabatan</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={positionData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="position" fontSize={11} interval={0} />
@@ -229,7 +229,7 @@ export function EmployeeByPosition({ stats }: EmployeeByPositionProps) {
             <CardTitle>Komposisi Jabatan</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Legend />
                 <Pie

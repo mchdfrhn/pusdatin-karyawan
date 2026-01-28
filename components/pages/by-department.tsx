@@ -247,6 +247,7 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
                   data={departmentCategory.slice(0, 8)}
                   cx="50%"
                   cy="50%"
+                  innerRadius={60}
                   outerRadius={100}
                   paddingAngle={2}
                   dataKey="value"
