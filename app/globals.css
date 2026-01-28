@@ -1,6 +1,43 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@layer utilities {
+  @media print {
+    @page {
+      size: A4;
+      margin: 10mm;
+    }
+
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      width: 210mm;
+      height: 297mm;
+    }
+
+    /* Print Break Utilities */
+    .print-break-inside-avoid {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .print-break-before {
+      break-before: page;
+      page-break-before: always;
+    }
+
+    .print-break-after {
+      break-after: page;
+      page-break-after: always;
+    }
+
+    .print-break-after-avoid {
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

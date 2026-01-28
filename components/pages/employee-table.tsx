@@ -1,6 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  Search,
+  Filter,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  FileSpreadsheet,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -506,158 +514,232 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader>
+      <Card className="border border-slate-200 shadow-sm overflow-hidden print:overflow-visible print:shadow-sm print:border-slate-200">
+        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <CardTitle>Data Pegawai</CardTitle>
-            <div className="text-sm text-slate-600">
-              Total: {rows.length} baris
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Data Pegawai</CardTitle>
+                <div className="text-sm text-slate-500 font-normal">
+                  Total {rows.length.toLocaleString("id-ID")} pegawai terdaftar
+                </div>
+              </div>
+            </div>
+            <div className="text-sm font-medium text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">
+              Halaman {safePage} dari {totalPages}
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex w-full flex-col gap-3 md:flex-row md:items-center">
-              <div className="w-full md:max-w-sm">
-                <Input
-                  placeholder="Cari nama, status, jabatan, atau lainnya..."
-                  value={search}
-                  onChange={(event) => {
-                    setSearch(event.target.value);
-                    setPage(1);
-                  }}
-                />
+        <CardContent className="space-y-6 pt-6">
+          {/* Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 print:hidden">
+            <div className="md:col-span-5 lg:col-span-4 relative">
+              <div className="absolute left-3 top-2.5 text-slate-400">
+                <Search className="h-4 w-4" />
               </div>
-              <div className="w-full md:w-[220px]">
-                <Select
-                  value={categoryFilter}
-                  onValueChange={(value) => {
-                    setCategoryFilter(value);
-                    setPage(1);
-                  }}
-                  disabled={!categoryKey || categoryOptions.length === 0}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Filter kategori" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Semua Kategori</SelectItem>
-                    {categoryOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="w-full md:w-[220px]">
-                <Select
-                  value={educationFilter}
-                  onValueChange={(value) => {
-                    setEducationFilter(value);
-                    setPage(1);
-                  }}
-                  disabled={!educationKey || educationOptions.length === 0}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Filter pendidikan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Semua Pendidikan</SelectItem>
-                    {educationOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="w-full md:w-[220px]">
-                <Select
-                  value={genderFilter}
-                  onValueChange={(value) => {
-                    setGenderFilter(value);
-                    setPage(1);
-                  }}
-                  disabled={!genderKey || genderOptions.length === 0}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Filter gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Semua Gender</SelectItem>
-                    {genderOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Input
+                placeholder="Cari nama, NIP, atau jabatan..."
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setPage(1);
+                }}
+                className="pl-9 bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+              />
             </div>
-            <div className="text-sm text-slate-600">
-              Menampilkan {pageStart}-{pageEnd} dari {filteredRows.length} data
+            <div className="md:col-span-7 lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Select
+                value={categoryFilter}
+                onValueChange={(value) => {
+                  setCategoryFilter(value);
+                  setPage(1);
+                }}
+                disabled={!categoryKey || categoryOptions.length === 0}
+              >
+                <SelectTrigger className="w-full bg-slate-50 border-slate-200 focus:bg-white">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <Filter className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                    <span className="truncate">
+                      {categoryFilter === "all"
+                        ? "Kategori"
+                        : categoryOptions.find(
+                            (o) => o.value === categoryFilter,
+                          )?.label}
+                    </span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Kategori</SelectItem>
+                  {categoryOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={educationFilter}
+                onValueChange={(value) => {
+                  setEducationFilter(value);
+                  setPage(1);
+                }}
+                disabled={!educationKey || educationOptions.length === 0}
+              >
+                <SelectTrigger className="w-full bg-slate-50 border-slate-200 focus:bg-white">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <Filter className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                    <span className="truncate">
+                      {educationFilter === "all"
+                        ? "Pendidikan"
+                        : educationOptions.find(
+                            (o) => o.value === educationFilter,
+                          )?.label}
+                    </span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Pendidikan</SelectItem>
+                  {educationOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={genderFilter}
+                onValueChange={(value) => {
+                  setGenderFilter(value);
+                  setPage(1);
+                }}
+                disabled={!genderKey || genderOptions.length === 0}
+              >
+                <SelectTrigger className="w-full bg-slate-50 border-slate-200 focus:bg-white">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <Filter className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                    <span className="truncate">
+                      {genderFilter === "all"
+                        ? "Gender"
+                        : genderOptions.find((o) => o.value === genderFilter)
+                            ?.label}
+                    </span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Gender</SelectItem>
+                  {genderOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50">
-                <TableHead>No</TableHead>
-                {columns.map((column) => (
-                  <TableHead key={column.key}>{column.label}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pageRows.map((row, index) => (
-                <TableRow key={getRowKey(row, pageStart + index)}>
-                  <TableCell>{pageStart + index}</TableCell>
-                  {columns.map((column) => {
-                    const value = row[column.key];
-                    const text = formatValue(value);
-                    return (
-                      <TableCell
-                        key={column.key}
-                        className="max-w-[240px] truncate"
-                        title={text}
-                      >
-                        {text}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))}
-              {pageRows.length === 0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length + 1}
-                    className="py-6 text-center text-slate-500"
-                  >
-                    Tidak ada data yang cocok.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <div className="flex items-center justify-between text-xs text-slate-500 px-1 print:hidden">
+            <span>
+              Menampilkan {pageStart}-{pageEnd} dari {filteredRows.length} data
+            </span>
+          </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="rounded-md border border-slate-200 overflow-hidden print:overflow-visible">
+            <Table className="print:text-xs">
+              <TableHeader>
+                <TableRow className="bg-slate-50/80 hover:bg-slate-50 text-slate-700 print:bg-slate-100">
+                  <TableHead className="w-[50px] font-semibold text-center print:w-[30px] print:p-2">
+                    No
+                  </TableHead>
+                  {columns.map((column) => (
+                    <TableHead
+                      key={column.key}
+                      className="font-semibold whitespace-nowrap print:p-2"
+                    >
+                      {column.label}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pageRows.map((row, index) => (
+                  <TableRow
+                    key={getRowKey(row, pageStart + index)}
+                    className="hover:bg-blue-50/50 transition-colors print-break-inside-avoid"
+                  >
+                    <TableCell className="text-center text-slate-500 text-xs print:p-2">
+                      {pageStart + index}
+                    </TableCell>
+                    {columns.map((column) => {
+                      const value = row[column.key];
+                      const text = formatValue(value);
+                      return (
+                        <TableCell
+                          key={column.key}
+                          className="max-w-[200px] truncate text-slate-700 text-sm whitespace-nowrap print:whitespace-normal print:break-words print:max-w-none print:p-2 print:text-xs"
+                          title={text}
+                        >
+                          {text}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+                {pageRows.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length + 1}
+                      className="h-32 text-center"
+                    >
+                      <div className="flex flex-col items-center justify-center text-slate-500 gap-2">
+                        <FileSpreadsheet className="h-10 w-10 text-slate-300" />
+                        <p>
+                          Tidak ada data yang cocok dengan filter pencarian.
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 print:hidden">
             <Button
               variant="outline"
+              size="sm"
               disabled={safePage <= 1}
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              className="h-9 px-4 text-xs font-medium"
             >
+              <ChevronLeft className="h-3.5 w-3.5 mr-2" />
               Sebelumnya
             </Button>
-            <div className="text-sm text-slate-600">
-              Halaman {safePage} dari {totalPages}
+
+            <div className="hidden sm:flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                // Simple logic to show a few page numbers around current page could go here
+                // For now, simpler pagination is cleaner
+                return null;
+              })}
+              <div className="text-xs text-slate-500 font-medium bg-slate-100 px-3 py-1.5 rounded-full">
+                Page {safePage} / {totalPages}
+              </div>
             </div>
+
             <Button
               variant="outline"
+              size="sm"
               disabled={safePage >= totalPages}
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+              className="h-9 px-4 text-xs font-medium"
             >
               Selanjutnya
+              <ChevronRight className="h-3.5 w-3.5 ml-2" />
             </Button>
           </div>
         </CardContent>

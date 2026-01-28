@@ -60,7 +60,7 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 print:grid-cols-3">
         {[
           {
             label: "Total Pegawai",
@@ -89,13 +89,13 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border border-slate-200 shadow-sm">
+      <div className="grid gap-6 lg:grid-cols-2 print:block">
+        <Card className="border border-slate-200 shadow-sm print-break-inside-avoid print:mb-6">
           <CardHeader>
             <CardTitle>Distribusi Gender per Golongan</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={departmentData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="dept" fontSize={11} interval={0} />
@@ -168,24 +168,28 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
                   fill="#3b82f6"
                   name="Laki-laki"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="female"
                   fill="#ec4899"
                   name="Perempuan"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 shadow-sm">
+        <Card className="border border-slate-200 shadow-sm print-break-inside-avoid print:mb-6">
           <CardHeader>
             <CardTitle>Komposisi Golongan</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Legend />
                 <Pie
@@ -197,6 +201,8 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
                   dataKey="value"
                   label={renderPieLabel}
                   labelLine={false}
+                  animationBegin={0}
+                  animationDuration={1000}
                 >
                   {departmentCategory.slice(0, 8).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -221,15 +227,18 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
       </div>
 
       {/* Table */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader>
+      <Card className="border border-slate-200 shadow-sm print:break-inside-auto print-break-before">
+        <CardHeader className="print:hidden">
           <CardTitle>Detail Distribusi Gender per Golongan</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="hidden print:block mb-4 font-bold text-lg print-break-after-avoid">
+            Detail Distribusi Gender per Golongan
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+              <thead className="print-break-after-avoid">
+                <tr className="border-b border-slate-200 bg-slate-50 print-break-inside-avoid">
                   <th className="px-4 py-3 text-left font-semibold text-slate-700">
                     Golongan
                   </th>

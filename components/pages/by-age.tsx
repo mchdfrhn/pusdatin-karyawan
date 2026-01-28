@@ -45,7 +45,7 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-4 print:grid-cols-4">
         {[
           {
             label: "Total Pegawai",
@@ -79,9 +79,9 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 print:block">
         {/* Bar Chart */}
-        <Card className="border border-slate-200 shadow-sm">
+        <Card className="border border-slate-200 shadow-sm print-break-inside-avoid print:mb-6">
           <CardHeader>
             <CardTitle>Distribusi Pegawai per Kelompok Usia</CardTitle>
           </CardHeader>
@@ -183,24 +183,32 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
                   fill="#10b981"
                   name="PNS"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="cpns"
                   fill="#a855f7"
                   name="CPNS"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="pppk"
                   fill="#f59e0b"
                   name="PPPK"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="ki"
                   fill="#06b6d4"
                   name="KI"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -208,7 +216,7 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
         </Card>
 
         {/* Pie Chart */}
-        <Card className="border border-slate-200 shadow-sm">
+        <Card className="border border-slate-200 shadow-sm print-break-inside-avoid print:mb-6">
           <CardHeader>
             <CardTitle>Komposisi per Kategori</CardTitle>
           </CardHeader>
@@ -226,6 +234,8 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
                   dataKey="value"
                   label={renderCustomLabel}
                   labelLine={false}
+                  animationBegin={0}
+                  animationDuration={1000}
                 >
                   {ageCategoryData.map((entry) => (
                     <Cell key={`cell-${entry.name}`} fill={entry.color} />
@@ -250,15 +260,18 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
       </div>
 
       {/* Table */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader>
+      <Card className="border border-slate-200 shadow-sm print:break-inside-auto print-break-before">
+        <CardHeader className="print:hidden">
           <CardTitle>Detail Distribusi per Usia dan Kategori</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="hidden print:block mb-4 font-bold text-lg print-break-after-avoid">
+            Detail Distribusi per Usia dan Kategori
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+              <thead className="print-break-after-avoid">
+                <tr className="border-b border-slate-200 bg-slate-50 print-break-inside-avoid">
                   <th className="px-4 py-3 text-left font-semibold text-slate-700">
                     Usia
                   </th>
@@ -283,7 +296,7 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
                 {ageData.map((row) => (
                   <tr
                     key={row.range}
-                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors print-break-inside-avoid"
                   >
                     <td className="px-4 py-3 font-medium text-slate-700">
                       {row.range}
