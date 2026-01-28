@@ -285,6 +285,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [genderFilter, setGenderFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const columns = useMemo(() => buildColumns(rows, COLUMN_OVERRIDE), [rows]);
   const educationKey = useMemo(() => findKey(rows, EDUCATION_KEYS), [rows]);
@@ -413,10 +414,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
     genderKey,
   ]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredRows.length / DEFAULT_PAGE_SIZE),
-  );
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
   const safePage = Math.min(page, totalPages);
 
   useEffect(() => {
@@ -424,6 +422,11 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
       setPage(safePage);
     }
   }, [page, safePage]);
+
+  // Reset page when pageSize changes
+  useEffect(() => {
+    setPage(1);
+  }, [pageSize]);
 
   useEffect(() => {
     if (educationFilter === "all") {
@@ -462,15 +465,13 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
   }, [genderFilter, genderOptions]);
 
   const pageRows = useMemo(() => {
-    const startIndex = (safePage - 1) * DEFAULT_PAGE_SIZE;
-    return filteredRows.slice(startIndex, startIndex + DEFAULT_PAGE_SIZE);
-  }, [filteredRows, safePage]);
+    const startIndex = (safePage - 1) * pageSize;
+    return filteredRows.slice(startIndex, startIndex + pageSize);
+  }, [filteredRows, safePage, pageSize]);
 
-  const pageStart = filteredRows.length
-    ? (safePage - 1) * DEFAULT_PAGE_SIZE + 1
-    : 0;
+  const pageStart = filteredRows.length ? (safePage - 1) * pageSize + 1 : 0;
   const pageEnd = filteredRows.length
-    ? Math.min(safePage * DEFAULT_PAGE_SIZE, filteredRows.length)
+    ? Math.min(safePage * pageSize, filteredRows.length)
     : 0;
 
   if (status === "loading") {
@@ -528,7 +529,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                 </div>
               </div>
             </div>
-            <div className="text-sm font-medium text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">
+            <div className="text-sm font-medium text-slate-600 bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm">
               Halaman {safePage} dari {totalPages}
             </div>
           </div>
@@ -708,39 +709,60 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
             </Table>
           </div>
 
-          <div className="flex items-center justify-between pt-2 print:hidden">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={safePage <= 1}
-              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-              className="h-9 px-4 text-xs font-medium"
-            >
-              <ChevronLeft className="h-3.5 w-3.5 mr-2" />
-              Sebelumnya
-            </Button>
-
-            <div className="hidden sm:flex items-center gap-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                // Simple logic to show a few page numbers around current page could go here
-                // For now, simpler pagination is cleaner
-                return null;
-              })}
-              <div className="text-xs text-slate-500 font-medium bg-slate-100 px-3 py-1.5 rounded-full">
-                Page {safePage} / {totalPages}
-              </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 print:hidden">
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-2 order-2 sm:order-1">
+              <p className="text-sm text-slate-500">Baris per halaman</p>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => setPageSize(Number(value))}
+              >
+                <SelectTrigger className="h-9 w-[70px] bg-white border-slate-200">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={safePage >= totalPages}
-              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-              className="h-9 px-4 text-xs font-medium"
-            >
-              Selanjutnya
-              <ChevronRight className="h-3.5 w-3.5 ml-2" />
-            </Button>
+            {/* Pagination Buttons */}
+            <div className="flex items-center gap-2 order-1 sm:order-2 w-full sm:w-auto justify-between sm:justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={safePage <= 1}
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                className="h-9 px-4 text-xs font-medium"
+              >
+                <ChevronLeft className="h-3.5 w-3.5 mr-2" />
+                Sebelumnya
+              </Button>
+
+              <div className="flex sm:hidden text-xs text-slate-500 font-medium bg-slate-100 px-3 py-1.5 rounded-full">
+                {safePage} / {totalPages}
+              </div>
+
+              <div className="hidden sm:flex text-xs text-slate-500 font-medium bg-slate-100 px-3 py-1.5 rounded-full">
+                Page {safePage} / {totalPages}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={safePage >= totalPages}
+                onClick={() =>
+                  setPage((prev) => Math.min(totalPages, prev + 1))
+                }
+                className="h-9 px-4 text-xs font-medium"
+              >
+                Selanjutnya
+                <ChevronRight className="h-3.5 w-3.5 ml-2" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
