@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEmployeeStats } from "@/hooks/use-employee-stats";
+import { EmployeeForm } from "@/components/employee-form";
+import { Plus } from "lucide-react";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard" },
@@ -25,6 +27,7 @@ const tabs = [
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
   const { stats, rows, status, error } = useEmployeeStats();
 
   const handlePrintPDF = () => {
@@ -122,6 +125,11 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 print:bg-white">
+      <EmployeeForm
+        open={isAddEmployeeOpen}
+        onOpenChange={setIsAddEmployeeOpen}
+      />
+
       {/* Header */}
       <div className="border-b border-slate-200 bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-6 md:px-8">
@@ -134,12 +142,21 @@ export default function Home() {
                 Dashboard Manajemen Data Pegawai
               </p>
             </div>
-            <Button
-              onClick={handlePrintPDF}
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-md print:hidden"
-            >
-              Print PDF
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setIsAddEmployeeOpen(true)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md print:hidden"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Tambah Pegawai
+              </Button>
+              <Button
+                onClick={handlePrintPDF}
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-md print:hidden"
+              >
+                Print PDF
+              </Button>
+            </div>
           </div>
         </div>
       </div>
