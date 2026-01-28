@@ -80,6 +80,7 @@ Pastikan Anda telah menginstal [Node.js](https://nodejs.org/) (versi 18+ direkom
     ```env
     NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
     NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+    SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
     # Opsional: Nama tabel custom (Default: employees)
     NEXT_PUBLIC_SUPABASE_EMPLOYEE_TABLE=employees

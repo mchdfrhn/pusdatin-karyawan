@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase/client";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 export type EmployeeFormValues = {
@@ -28,27 +28,24 @@ export async function addEmployee(data: EmployeeFormValues) {
 
   // Map form values to database columns
   const payload = {
-    nama: data.nama,
+    nama_lengkap: data.nama,
     nik: data.nik,
     nip: data.nip,
-    tempat_lahir: data.tempat_lahir,
     tanggal_lahir: data.tanggal_lahir,
     jenis_kelamin: data.jenis_kelamin,
     email: data.email,
-    status_kepegawaian: data.status_kepegawaian,
+    kategori: data.status_kepegawaian,
     jenis_jabatan: data.jenis_jabatan,
     eselon: data.eselon === "Non-Eselon" ? null : data.eselon,
-    jabatan: data.nama_jabatan, // Mapped to 'jabatan'
+    jabatan: data.nama_jabatan,
     golongan: data.golongan,
     bidang: data.bidang,
-    unit_kerja: data.unit_kerja,
-    instansi: data.instansi,
-    pendidikan_terakhir: data.pendidikan_terakhir,
-    created_at: new Date().toISOString(),
+    pendidikan: data.pendidikan_terakhir,
   };
 
   try {
-    const { error } = await supabase.from(tableName).insert([payload]);
+    // Use supabaseAdmin to bypass RLS
+    const { error } = await supabaseAdmin.from(tableName).insert([payload]);
 
     if (error) {
       console.error("Supabase insert error:", error);
