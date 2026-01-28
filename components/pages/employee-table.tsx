@@ -779,7 +779,7 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                 value={String(pageSize)}
                 onValueChange={(value) => setPageSize(Number(value))}
               >
-                <SelectTrigger className="h-9 w-[70px] bg-white border-slate-200">
+                <SelectTrigger className="h-9 w-[80px] bg-white border-slate-200">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
