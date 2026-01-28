@@ -655,9 +655,26 @@ function normalizePositionGroup(
     ) {
       if (eselonValue) {
         const eselon = String(eselonValue).trim().toUpperCase();
-        if (eselon === "II" || eselon.includes("II")) return "Eselon II";
-        if (eselon === "III" || eselon.includes("III")) return "Eselon III";
-        if (eselon === "IV" || eselon.includes("IV")) return "Eselon IV";
+        // Check for III first (as it contains II)
+        if (
+          eselon === "III" ||
+          eselon.startsWith("III") ||
+          eselon.includes("ESELON III")
+        )
+          return "Eselon III";
+        if (
+          eselon === "II" ||
+          eselon.startsWith("II") ||
+          eselon.includes("ESELON II")
+        )
+          return "Eselon II";
+        if (
+          eselon === "IV" ||
+          eselon.startsWith("IV") ||
+          eselon.includes("ESELON IV")
+        )
+          return "Eselon IV";
+
         // Fallback for Struktural but unknown Eselon
         return "Struktural (Unknown Eselon)";
       }
@@ -686,9 +703,24 @@ function normalizePositionGroup(
   // 1. Trust the 'eselon' column if it exists and looks like Roman numerals
   if (eselonValue) {
     const eselon = String(eselonValue).trim().toUpperCase();
-    if (eselon === "II" || eselon.includes("II")) return "Eselon II";
-    if (eselon === "III" || eselon.includes("III")) return "Eselon III";
-    if (eselon === "IV" || eselon.includes("IV")) return "Eselon IV";
+    if (
+      eselon === "III" ||
+      eselon.startsWith("III") ||
+      eselon.includes("ESELON III")
+    )
+      return "Eselon III";
+    if (
+      eselon === "II" ||
+      eselon.startsWith("II") ||
+      eselon.includes("ESELON II")
+    )
+      return "Eselon II";
+    if (
+      eselon === "IV" ||
+      eselon.startsWith("IV") ||
+      eselon.includes("ESELON IV")
+    )
+      return "Eselon IV";
   }
 
   if (!value) return "JFU"; // Default to JFU if missing
