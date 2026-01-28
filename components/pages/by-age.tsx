@@ -99,7 +99,7 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
                   }}
                   itemStyle={{ fontSize: "12px" }}
                   labelStyle={{ fontWeight: "bold", marginBottom: "5px" }}
-                  cursor={{ fill: "transparent" }}
+                  cursor={{ fill: "#f1f5f9" }}
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
                       const pns =
