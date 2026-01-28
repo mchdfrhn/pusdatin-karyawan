@@ -72,3 +72,32 @@ export async function addEmployee(data: EmployeeFormValues) {
     };
   }
 }
+
+export async function deleteEmployee(
+  identifier: string,
+  key: "id" | "nip" | "nik" = "id",
+) {
+  const tableName =
+    process.env.NEXT_PUBLIC_SUPABASE_EMPLOYEE_TABLE || "pegawai";
+
+  try {
+    const { error } = await supabaseAdmin
+      .from(tableName)
+      .delete()
+      .eq(key, identifier);
+
+    if (error) {
+      console.error("Supabase delete error:", error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/");
+    return { success: true, message: "Data pegawai berhasil dihapus." };
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return {
+      success: false,
+      error: "Terjadi kesalahan yang tidak terduga saat menghapus data.",
+    };
+  }
+}

@@ -29,6 +29,7 @@ const tabs = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const { stats, rows, status, error } = useEmployeeStats();
 
   useEffect(() => {
@@ -49,7 +50,14 @@ export default function Home() {
 
   const renderContent = () => {
     if (activeTab === "tabel") {
-      return <EmployeeTable rows={rows} status={status} error={error} />;
+      return (
+        <EmployeeTable
+          rows={rows}
+          status={status}
+          error={error}
+          isEditMode={isEditMode}
+        />
+      );
     }
 
     if (status === "loading") {
@@ -160,6 +168,16 @@ export default function Home() {
               </p>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant={isEditMode ? "destructive" : "outline"}
+                onClick={() => {
+                  if (!isEditMode) setActiveTab("tabel");
+                  setIsEditMode(!isEditMode);
+                }}
+                className="shadow-md print:hidden"
+              >
+                {isEditMode ? "Selesai Ubah" : "Ubah Data"}
+              </Button>
               <Button
                 onClick={() => setIsAddEmployeeOpen(true)}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md print:hidden"

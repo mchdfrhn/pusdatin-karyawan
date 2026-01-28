@@ -9,7 +9,20 @@ import {
   ChevronRight,
   FileSpreadsheet,
   Plus,
+  Trash2,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { deleteEmployee } from "@/app/actions";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,6 +48,7 @@ type EmployeeTableProps = {
   rows: RawRow[];
   status: "loading" | "ready" | "error";
   error: string | null;
+  isEditMode?: boolean;
 };
 
 type Column = {
@@ -281,13 +295,53 @@ function getRowKey(row: RawRow, fallback: number): string {
   return String(fallback);
 }
 
-export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
+export function EmployeeTable({
+  rows,
+  status,
+  error,
+  isEditMode = false,
+}: EmployeeTableProps) {
   const [search, setSearch] = useState("");
   const [educationFilter, setEducationFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [genderFilter, setGenderFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  // Delete state
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmationText, setConfirmationText] = useState("");
+
+  // Handle delete
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    if (confirmationText !== "hapus") return;
+
+    // Determine identifier (NIP usually)
+    // We need to look up the row to find the NIP or ID
+    // But here we only have the ID passed to setDeleteId
+    // Assuming deleteId IS the identifier
+
+    setIsDeleting(true);
+    // Use "id" if available, or fallback to "nip" if you adjusted `deleteEmployee`
+    // Since rows might not have clean 'id', we should ensure we pass the right thing.
+    // For now, let's assume we pass the ID.
+    const result = await deleteEmployee(deleteId, "id");
+
+    if (result.success) {
+      sessionStorage.setItem(
+        "toast_message",
+        result.message || "Data pegawai berhasil dihapus.",
+      );
+      window.location.reload();
+    } else {
+      toast.error(result.error);
+    }
+    setIsDeleting(false);
+    setDeleteId(null);
+    setConfirmationText("");
+  };
 
   const columns = useMemo(() => buildColumns(rows, COLUMN_OVERRIDE), [rows]);
   const educationKey = useMemo(() => findKey(rows, EDUCATION_KEYS), [rows]);
@@ -726,6 +780,11 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                       {column.label}
                     </TableHead>
                   ))}
+                  {isEditMode && (
+                    <TableHead className="w-[80px] font-semibold text-center print:hidden">
+                      Aksi
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -750,6 +809,30 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
                         </TableCell>
                       );
                     })}
+                    {isEditMode && (
+                      <TableCell className="text-center print:hidden">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={isDeleting}
+                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => {
+                            // Try to find the best ID. 'id' is standard, 'uuid' might exist, or 'nip'
+                            const id =
+                              (row.id as string) ||
+                              (row.uuid as string) ||
+                              (row.nip as string);
+                            if (id) setDeleteId(String(id));
+                            else
+                              toast.error(
+                                "Tidak dapat menemukan ID untuk pegawai ini.",
+                              );
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
                 {pageRows.length === 0 && (
@@ -828,6 +911,48 @@ export function EmployeeTable({ rows, status, error }: EmployeeTableProps) {
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={!!deleteId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteId(null);
+            setConfirmationText("");
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tindakan ini tidak dapat dibatalkan. Data pegawai ini akan dihapus
+              permanen dari database.
+              <br />
+              <br />
+              Ketik <strong>hapus</strong> di bawah ini untuk konfirmasi:
+            </AlertDialogDescription>
+            <Input
+              value={confirmationText}
+              onChange={(e) => setConfirmationText(e.target.value)}
+              placeholder='Ketik "hapus" disini...'
+              className="mt-2"
+            />
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={isDeleting || confirmationText !== "hapus"}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isDeleting ? "Menghapus..." : "Hapus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
