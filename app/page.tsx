@@ -219,14 +219,14 @@ export default function Home() {
                 }}
                 className="shadow-md print:hidden"
               >
-                {isEditMode ? "Selesai Ubah" : "Ubah Data"}
+                {isEditMode ? "Batal Ubah" : "Ubah Data"}
               </Button>
               <Button
                 onClick={() => setIsAddEmployeeOpen(true)}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md print:hidden"
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Tambah Pegawai
+                Tambah Data
               </Button>
               <Button
                 onClick={handlePrintPDF}
