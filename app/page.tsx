@@ -15,7 +15,20 @@ import { useEmployeeStats } from "@/hooks/use-employee-stats";
 import { EmployeeForm } from "@/components/employee-form";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { type EmployeeFormValues } from "@/app/actions";
+import { signOut } from "@/app/login/actions";
+import { LogOut } from "lucide-react";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard" },
@@ -234,6 +247,36 @@ export default function Home() {
               >
                 Print PDF
               </Button>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="gap-2 text-slate-700 hover:text-red-600 hover:bg-red-50 border-slate-200 shadow-sm print:hidden"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Keluar
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Konfirmasi Keluar</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Apakah Anda yakin ingin keluar dari aplikasi? Anda perlu
+                      login kembali untuk mengakses dashboard.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => signOut()}
+                      className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                    >
+                      Ya, Keluar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </div>

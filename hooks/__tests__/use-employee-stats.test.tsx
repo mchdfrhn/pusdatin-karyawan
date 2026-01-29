@@ -1,15 +1,18 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { useEmployeeStats } from "../use-employee-stats";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { supabase } from "@/lib/supabase/client";
+
+// Define mock functions outside to be accessible
+const mockSelect = vi.fn();
+const mockFrom = vi.fn(() => ({
+  select: mockSelect,
+}));
 
 // Mock supabase client
 vi.mock("@/lib/supabase/client", () => ({
-  supabase: {
-    from: vi.fn(() => ({
-      select: vi.fn(),
-    })),
-  },
+  createClient: vi.fn(() => ({
+    from: mockFrom,
+  })),
 }));
 
 describe("useEmployeeStats", () => {
@@ -19,10 +22,7 @@ describe("useEmployeeStats", () => {
 
   it("returns initial loading state", () => {
     // Mock implementation to delay or just generic return
-    const selectMock = vi.fn().mockReturnValue(new Promise(() => {}));
-    const fromMock = vi
-      .mocked(supabase.from)
-      .mockReturnValue({ select: selectMock } as any);
+    mockSelect.mockReturnValue(new Promise(() => {}));
 
     const { result } = renderHook(() => useEmployeeStats());
 
@@ -41,12 +41,7 @@ describe("useEmployeeStats", () => {
       },
     ];
 
-    const selectMock = vi
-      .fn()
-      .mockResolvedValue({ data: mockData, error: null });
-    const fromMock = vi
-      .mocked(supabase.from)
-      .mockReturnValue({ select: selectMock } as any);
+    mockSelect.mockResolvedValue({ data: mockData, error: null });
 
     const { result } = renderHook(() => useEmployeeStats());
 
@@ -61,12 +56,7 @@ describe("useEmployeeStats", () => {
   it("handles error state", async () => {
     const mockError = { message: "Network error" };
 
-    const selectMock = vi
-      .fn()
-      .mockResolvedValue({ data: null, error: mockError });
-    const fromMock = vi
-      .mocked(supabase.from)
-      .mockReturnValue({ select: selectMock } as any);
+    mockSelect.mockResolvedValue({ data: null, error: mockError });
 
     const { result } = renderHook(() => useEmployeeStats());
 
