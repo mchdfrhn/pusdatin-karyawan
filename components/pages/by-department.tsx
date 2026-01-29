@@ -1,5 +1,4 @@
-"use client";
-
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { EmployeeStats } from "@/lib/data/employee-stats";
 import {
@@ -14,6 +13,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Sector,
 } from "recharts";
 
 type EmployeeByDepartmentProps = {
@@ -22,6 +22,53 @@ type EmployeeByDepartmentProps = {
 
 export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
   const { departmentData, departmentCategory, summary } = stats;
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+
+  const renderActiveShape = (props: any) => {
+    const {
+      cx,
+      cy,
+      innerRadius,
+      outerRadius,
+      startAngle,
+      endAngle,
+      fill,
+      payload,
+      percent,
+      value,
+    } = props;
+
+    return (
+      <g>
+        <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+          {payload.name}
+        </text>
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius + 10}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={fill}
+          filter="drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.15))"
+        />
+        <Sector
+          cx={cx}
+          cy={cy}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          innerRadius={outerRadius + 12}
+          outerRadius={outerRadius + 14}
+          fill={fill}
+        />
+      </g>
+    );
+  };
   const totalEmployees = departmentData.reduce(
     (sum, item) => sum + item.male + item.female,
     0,
@@ -31,8 +78,8 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
     const { x, y, width, value } = props;
     return (
       <text
-        x={x - 10}
-        y={y + 8}
+        x={x + width / 2}
+        y={y - 5}
         fill="#374151"
         textAnchor="middle"
         fontSize={11}
@@ -60,7 +107,7 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 print:grid-cols-3">
         {[
           {
             label: "Total Pegawai",
@@ -89,28 +136,77 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border border-slate-200 shadow-sm">
+      <div className="grid gap-6 lg:grid-cols-2 print:block">
+        <Card className="border border-slate-200 shadow-sm print-break-inside-avoid print:mb-6">
           <CardHeader>
             <CardTitle>Distribusi Gender per Golongan</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={departmentData} layout="vertical">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={departmentData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis type="number" />
-                <YAxis dataKey="dept" type="category" width={60} />
+                <XAxis dataKey="dept" fontSize={11} interval={0} />
+                <YAxis />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#fff",
                     border: "1px solid #e2e8f0",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number) => {
-                    const percent = totalEmployees
-                      ? ((value / totalEmployees) * 100).toFixed(1)
-                      : "0.0";
-                    return `${value} (${percent}%)`;
+                  itemStyle={{ fontSize: "12px" }}
+                  labelStyle={{ fontWeight: "bold", marginBottom: "5px" }}
+                  cursor={{ fill: "#f1f5f9" }}
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      const male =
+                        (payload.find((p) => p.name === "Laki-laki")
+                          ?.value as number) || 0;
+                      const female =
+                        (payload.find((p) => p.name === "Perempuan")
+                          ?.value as number) || 0;
+                      const total = male + female;
+                      const percent = totalEmployees
+                        ? ((total / totalEmployees) * 100).toFixed(1)
+                        : "0.0";
+
+                      const malePercent = total
+                        ? ((male / total) * 100).toFixed(1)
+                        : "0.0";
+                      const femalePercent = total
+                        ? ((female / total) * 100).toFixed(1)
+                        : "0.0";
+
+                      return (
+                        <div className="bg-white p-3 border border-slate-200 rounded-lg shadow-lg">
+                          <p className="font-bold text-sm mb-2">{label}</p>
+                          <div className="space-y-1 text-xs">
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                              <span className="text-slate-600">Laki-laki:</span>
+                              <span className="font-semibold">
+                                {male} ({malePercent}%)
+                              </span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-pink-500"></span>
+                              <span className="text-slate-600">Perempuan:</span>
+                              <span className="font-semibold">
+                                {female} ({femalePercent}%)
+                              </span>
+                            </p>
+                            <div className="border-t border-slate-100 my-1 pt-1">
+                              <p className="flex items-center gap-2 font-medium">
+                                <span className="text-slate-700">Total:</span>
+                                <span className="font-bold text-slate-900">
+                                  {total} ({percent}%)
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
                   }}
                 />
                 <Legend />
@@ -119,35 +215,46 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
                   fill="#3b82f6"
                   name="Laki-laki"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="female"
                   fill="#ec4899"
                   name="Perempuan"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 shadow-sm">
+        <Card className="border border-slate-200 shadow-sm print-break-inside-avoid print:mb-6">
           <CardHeader>
             <CardTitle>Komposisi Golongan</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Legend />
                 <Pie
+                  activeIndex={activeIndex}
+                  activeShape={renderActiveShape}
+                  onMouseEnter={onPieEnter}
+                  onMouseLeave={() => setActiveIndex(-1)}
                   data={departmentCategory.slice(0, 8)}
                   cx="50%"
                   cy="50%"
+                  innerRadius={60}
                   outerRadius={100}
                   paddingAngle={2}
                   dataKey="value"
                   label={renderPieLabel}
                   labelLine={false}
+                  animationBegin={0}
+                  animationDuration={1000}
                 >
                   {departmentCategory.slice(0, 8).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -172,15 +279,18 @@ export function EmployeeByDepartment({ stats }: EmployeeByDepartmentProps) {
       </div>
 
       {/* Table */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader>
+      <Card className="border border-slate-200 shadow-sm print:break-inside-auto print-break-before">
+        <CardHeader className="print:hidden">
           <CardTitle>Detail Distribusi Gender per Golongan</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="hidden print:block mb-4 font-bold text-lg print-break-after-avoid">
+            Detail Distribusi Gender per Golongan
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+              <thead className="print-break-after-avoid">
+                <tr className="border-b border-slate-200 bg-slate-50 print-break-inside-avoid">
                   <th className="px-4 py-3 text-left font-semibold text-slate-700">
                     Golongan
                   </th>

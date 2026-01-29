@@ -1,5 +1,4 @@
-"use client";
-
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { EmployeeStats } from "@/lib/data/employee-stats";
 import {
@@ -14,6 +13,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Sector,
 } from "recharts";
 
 type EmployeeByAgeProps = {
@@ -22,6 +22,53 @@ type EmployeeByAgeProps = {
 
 export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
   const { ageData, ageCategoryData, summary } = stats;
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+
+  const renderActiveShape = (props: any) => {
+    const {
+      cx,
+      cy,
+      innerRadius,
+      outerRadius,
+      startAngle,
+      endAngle,
+      fill,
+      payload,
+      percent,
+      value,
+    } = props;
+
+    return (
+      <g>
+        <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+          {payload.name}
+        </text>
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius + 10}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={fill}
+          filter="drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.15))"
+        />
+        <Sector
+          cx={cx}
+          cy={cy}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          innerRadius={outerRadius + 12}
+          outerRadius={outerRadius + 14}
+          fill={fill}
+        />
+      </g>
+    );
+  };
 
   const renderCustomLabel = (entry: any) => {
     return `${entry.value}`;
@@ -45,7 +92,7 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-4 print:grid-cols-4">
         {[
           {
             label: "Total Pegawai",
@@ -79,9 +126,9 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 print:block">
         {/* Bar Chart */}
-        <Card className="border border-slate-200 shadow-sm">
+        <Card className="border border-slate-200 shadow-sm print-break-inside-avoid print:mb-6">
           <CardHeader>
             <CardTitle>Distribusi Pegawai per Kelompok Usia</CardTitle>
           </CardHeader>
@@ -97,15 +144,84 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
                     border: "1px solid #e2e8f0",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number) => {
-                    const total = ageData.reduce(
-                      (sum, item) => sum + item.total,
-                      0,
-                    );
-                    const percent = total
-                      ? ((value / total) * 100).toFixed(1)
-                      : "0.0";
-                    return `${value} (${percent}%)`;
+                  itemStyle={{ fontSize: "12px" }}
+                  labelStyle={{ fontWeight: "bold", marginBottom: "5px" }}
+                  cursor={{ fill: "#f1f5f9" }}
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      const pns =
+                        (payload.find((p) => p.name === "PNS")
+                          ?.value as number) || 0;
+                      const cpns =
+                        (payload.find((p) => p.name === "CPNS")
+                          ?.value as number) || 0;
+                      const pppk =
+                        (payload.find((p) => p.name === "PPPK")
+                          ?.value as number) || 0;
+                      const ki =
+                        (payload.find((p) => p.name === "KI")
+                          ?.value as number) || 0;
+
+                      const total = pns + cpns + pppk + ki;
+
+                      const pnsPercent = total
+                        ? ((pns / total) * 100).toFixed(1)
+                        : "0.0";
+                      const cpnsPercent = total
+                        ? ((cpns / total) * 100).toFixed(1)
+                        : "0.0";
+                      const pppkPercent = total
+                        ? ((pppk / total) * 100).toFixed(1)
+                        : "0.0";
+                      const kiPercent = total
+                        ? ((ki / total) * 100).toFixed(1)
+                        : "0.0";
+
+                      return (
+                        <div className="bg-white p-3 border border-slate-200 rounded-lg shadow-lg">
+                          <p className="font-bold text-sm mb-2">{label}</p>
+                          <div className="space-y-1 text-xs">
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                              <span className="text-slate-600">PNS:</span>
+                              <span className="font-semibold">
+                                {pns} ({pnsPercent}%)
+                              </span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                              <span className="text-slate-600">CPNS:</span>
+                              <span className="font-semibold">
+                                {cpns} ({cpnsPercent}%)
+                              </span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                              <span className="text-slate-600">PPPK:</span>
+                              <span className="font-semibold">
+                                {pppk} ({pppkPercent}%)
+                              </span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
+                              <span className="text-slate-600">KI:</span>
+                              <span className="font-semibold">
+                                {ki} ({kiPercent}%)
+                              </span>
+                            </p>
+                            <div className="border-t border-slate-100 my-1 pt-1">
+                              <p className="flex items-center gap-2 font-medium">
+                                <span className="text-slate-700">Total:</span>
+                                <span className="font-bold text-slate-900">
+                                  {total}
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
                   }}
                 />
                 <Legend />
@@ -114,24 +230,32 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
                   fill="#10b981"
                   name="PNS"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="cpns"
                   fill="#a855f7"
                   name="CPNS"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="pppk"
                   fill="#f59e0b"
                   name="PPPK"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="ki"
                   fill="#06b6d4"
                   name="KI"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -139,7 +263,7 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
         </Card>
 
         {/* Pie Chart */}
-        <Card className="border border-slate-200 shadow-sm">
+        <Card className="border border-slate-200 shadow-sm print-break-inside-avoid print:mb-6">
           <CardHeader>
             <CardTitle>Komposisi per Kategori</CardTitle>
           </CardHeader>
@@ -148,6 +272,10 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
               <PieChart>
                 <Legend />
                 <Pie
+                  activeIndex={activeIndex}
+                  activeShape={renderActiveShape}
+                  onMouseEnter={onPieEnter}
+                  onMouseLeave={() => setActiveIndex(-1)}
                   data={ageCategoryData}
                   cx="50%"
                   cy="50%"
@@ -157,6 +285,8 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
                   dataKey="value"
                   label={renderCustomLabel}
                   labelLine={false}
+                  animationBegin={0}
+                  animationDuration={1000}
                 >
                   {ageCategoryData.map((entry) => (
                     <Cell key={`cell-${entry.name}`} fill={entry.color} />
@@ -181,15 +311,18 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
       </div>
 
       {/* Table */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader>
+      <Card className="border border-slate-200 shadow-sm print:break-inside-auto print-break-before">
+        <CardHeader className="print:hidden">
           <CardTitle>Detail Distribusi per Usia dan Kategori</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="hidden print:block mb-4 font-bold text-lg print-break-after-avoid">
+            Detail Distribusi per Usia dan Kategori
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+              <thead className="print-break-after-avoid">
+                <tr className="border-b border-slate-200 bg-slate-50 print-break-inside-avoid">
                   <th className="px-4 py-3 text-left font-semibold text-slate-700">
                     Usia
                   </th>
@@ -214,7 +347,7 @@ export function EmployeeByAge({ stats }: EmployeeByAgeProps) {
                 {ageData.map((row) => (
                   <tr
                     key={row.range}
-                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors print-break-inside-avoid"
                   >
                     <td className="px-4 py-3 font-medium text-slate-700">
                       {row.range}

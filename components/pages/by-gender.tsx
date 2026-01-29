@@ -1,5 +1,4 @@
-"use client";
-
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { EmployeeStats } from "@/lib/data/employee-stats";
 import {
@@ -14,6 +13,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Sector,
 } from "recharts";
 
 type EmployeeByGenderProps = {
@@ -22,6 +22,53 @@ type EmployeeByGenderProps = {
 
 export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
   const { genderAgeData, genderCategory, summary } = stats;
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+
+  const renderActiveShape = (props: any) => {
+    const {
+      cx,
+      cy,
+      innerRadius,
+      outerRadius,
+      startAngle,
+      endAngle,
+      fill,
+      payload,
+      percent,
+      value,
+    } = props;
+
+    return (
+      <g>
+        <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+          {payload.name}
+        </text>
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius + 10}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={fill}
+          filter="drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.15))"
+        />
+        <Sector
+          cx={cx}
+          cy={cy}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          innerRadius={outerRadius + 12}
+          outerRadius={outerRadius + 14}
+          fill={fill}
+        />
+      </g>
+    );
+  };
 
   const renderCustomLabel = (entry: any) => {
     return `${entry.value}`;
@@ -45,7 +92,7 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 print:grid-cols-3">
         {[
           {
             label: "Total Pegawai",
@@ -74,8 +121,8 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border border-slate-200 shadow-sm">
+      <div className="grid gap-6 lg:grid-cols-2 print:block">
+        <Card className="border border-slate-200 shadow-sm print:mb-6 print-break-inside-avoid">
           <CardHeader>
             <CardTitle>Distribusi Gender per Kelompok Usia</CardTitle>
           </CardHeader>
@@ -86,20 +133,64 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
                 <XAxis dataKey="age" />
                 <YAxis />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#fff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                  }}
-                  formatter={(value: number) => {
-                    const totalEmployees = genderAgeData.reduce(
-                      (sum, item) => sum + item.male + item.female,
-                      0,
-                    );
-                    const percent = totalEmployees
-                      ? ((value / totalEmployees) * 100).toFixed(1)
-                      : "0.0";
-                    return `${value} (${percent}%)`;
+                  itemStyle={{ fontSize: "12px" }}
+                  labelStyle={{ fontWeight: "bold", marginBottom: "5px" }}
+                  cursor={{ fill: "#f1f5f9" }}
+                  content={({
+                    active,
+                    payload,
+                    label,
+                  }: {
+                    active?: boolean;
+                    payload?: any[];
+                    label?: string;
+                  }) => {
+                    if (active && payload && payload.length) {
+                      const male =
+                        (payload.find((p: any) => p.name === "Laki-laki")
+                          ?.value as number) || 0;
+                      const female =
+                        (payload.find((p: any) => p.name === "Perempuan")
+                          ?.value as number) || 0;
+                      const total = male + female;
+                      const malePercent = total
+                        ? ((male / total) * 100).toFixed(1)
+                        : "0.0";
+                      const femalePercent = total
+                        ? ((female / total) * 100).toFixed(1)
+                        : "0.0";
+
+                      return (
+                        <div className="bg-white p-3 border border-slate-200 rounded-lg shadow-lg">
+                          <p className="font-bold text-sm mb-2">{label}</p>
+                          <div className="space-y-1 text-xs">
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                              <span className="text-slate-600">Laki-laki:</span>
+                              <span className="font-semibold">
+                                {male} ({malePercent}%)
+                              </span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-pink-500"></span>
+                              <span className="text-slate-600">Perempuan:</span>
+                              <span className="font-semibold">
+                                {female} ({femalePercent}%)
+                              </span>
+                            </p>
+                            <div className="border-t border-slate-100 my-1 pt-1">
+                              <p className="flex items-center gap-2 font-medium">
+                                <span className="text-slate-700">Total:</span>
+                                <span className="font-bold text-slate-900">
+                                  {total}
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
                   }}
                 />
                 <Legend />
@@ -108,19 +199,23 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
                   fill="#3b82f6"
                   name="Laki-laki"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
                 <Bar
                   dataKey="female"
                   fill="#ec4899"
                   name="Perempuan"
                   label={renderBarLabel}
+                  animationBegin={0}
+                  animationDuration={1000}
                 />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200 shadow-sm">
+        <Card className="border border-slate-200 shadow-sm print:mb-6 print-break-inside-avoid">
           <CardHeader>
             <CardTitle>Komposisi Gender</CardTitle>
           </CardHeader>
@@ -129,6 +224,10 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
               <PieChart>
                 <Legend />
                 <Pie
+                  activeIndex={activeIndex}
+                  activeShape={renderActiveShape}
+                  onMouseEnter={onPieEnter}
+                  onMouseLeave={() => setActiveIndex(-1)}
                   data={genderCategory}
                   cx="50%"
                   cy="50%"
@@ -138,6 +237,8 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
                   dataKey="value"
                   label={renderCustomLabel}
                   labelLine={false}
+                  animationBegin={0}
+                  animationDuration={1000}
                 >
                   {genderCategory.map((entry) => (
                     <Cell key={`cell-${entry.name}`} fill={entry.color} />
@@ -162,15 +263,18 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
       </div>
 
       {/* Gender Statistics by Age */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader>
+      <Card className="border border-slate-200 shadow-sm print:break-inside-auto print-break-before">
+        <CardHeader className="print:hidden">
           <CardTitle>Detail Distribusi Gender per Kelompok Usia</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="hidden print:block mb-4 font-bold text-lg print-break-after-avoid">
+            Detail Distribusi Gender per Kelompok Usia
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+              <thead className="print-break-after-avoid">
+                <tr className="border-b border-slate-200 bg-slate-50 print-break-inside-avoid">
                   <th className="px-4 py-3 text-left font-semibold text-slate-700">
                     Kelompok Usia
                   </th>
@@ -189,7 +293,7 @@ export function EmployeeByGender({ stats }: EmployeeByGenderProps) {
                 {genderAgeData.map((row) => (
                   <tr
                     key={row.age}
-                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors print-break-inside-avoid"
                   >
                     <td className="px-4 py-3 font-medium text-slate-700">
                       {row.age}
