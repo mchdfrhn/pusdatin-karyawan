@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { type EmployeeFormValues } from "@/app/actions";
 import { signOut } from "@/app/login/login.actions";
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard" },
@@ -43,6 +43,7 @@ const tabs = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<
     EmployeeFormValues | undefined
@@ -193,7 +194,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 print:bg-white">
+    <main className="min-h-screen bg-linear-to-br from-slate-50 via-white to-indigo-50/30 print:bg-white">
       <EmployeeForm
         open={isAddEmployeeOpen}
         onOpenChange={(open) => {
@@ -269,10 +270,22 @@ export default function Home() {
                   <AlertDialogFooter>
                     <AlertDialogCancel>Batal</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() => signOut()}
-                      className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        setIsLoggingOut(true);
+                        await signOut();
+                      }}
+                      disabled={isLoggingOut}
+                      className="bg-red-600 hover:bg-red-700 focus:ring-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Ya, Keluar
+                      {isLoggingOut ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Keluar...
+                        </>
+                      ) : (
+                        "Ya, Keluar"
+                      )}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

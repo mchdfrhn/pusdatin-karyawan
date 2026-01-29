@@ -1,5 +1,7 @@
 "use client";
 
+import { useFormStatus } from "react-dom";
+
 import { login } from "./login.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +10,27 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+
+function LoginButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      type="submit"
+      disabled={pending}
+      className="h-11 w-full rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-500 cursor-pointer shadow-lg hover:shadow-indigo-600/20 transition-all duration-200"
+    >
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Loading...
+        </>
+      ) : (
+        "Masuk Dashboard"
+      )}
+    </Button>
+  );
+}
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -32,7 +55,7 @@ function LoginForm() {
         </Alert>
       )}
 
-      <form className="space-y-4">
+      <form action={login} className="space-y-4">
         <div className="space-y-4">
           <div className="space-y-2">
             <Label
@@ -75,12 +98,7 @@ function LoginForm() {
           </div>
         </div>
 
-        <Button
-          formAction={login}
-          className="h-11 w-full rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-500 cursor-pointer shadow-lg hover:shadow-indigo-600/20 transition-all duration-200"
-        >
-          Masuk Dashboard
-        </Button>
+        <LoginButton />
       </form>
 
       <p className="px-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
@@ -102,7 +120,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen w-full">
       {/* Abstract Background Side */}
       <div className="hidden w-1/2 flex-col justify-between bg-slate-900 p-10 text-white lg:flex relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+        <div className="absolute inset-0 bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900">
           <svg
             className="absolute inset-0 h-full w-full opacity-[0.03]"
             xmlns="http://www.w3.org/2000/svg"
@@ -124,7 +142,7 @@ export default function LoginPage() {
             </defs>
             <rect width="100%" height="100%" fill="url(#grid-pattern)" />
           </svg>
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-slate-950 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-slate-950 to-transparent" />
         </div>
 
         <div className="z-20 flex items-center gap-2">
