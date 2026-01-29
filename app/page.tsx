@@ -27,7 +27,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { type EmployeeFormValues } from "@/app/actions";
-import { signOut } from "@/app/login/actions";
+import { signOut } from "@/app/login/login.actions";
 import { LogOut } from "lucide-react";
 
 const tabs = [
