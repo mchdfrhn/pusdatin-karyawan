@@ -193,7 +193,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 print:bg-white">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 print:bg-white">
       <EmployeeForm
         open={isAddEmployeeOpen}
         onOpenChange={(open) => {

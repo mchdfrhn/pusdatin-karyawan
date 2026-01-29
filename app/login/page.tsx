@@ -77,7 +77,7 @@ function LoginForm() {
 
         <Button
           formAction={login}
-          className="h-11 w-full rounded-lg bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-500 cursor-pointer shadow-lg hover:shadow-blue-600/20 transition-all duration-200"
+          className="h-11 w-full rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-500 cursor-pointer shadow-lg hover:shadow-indigo-600/20 transition-all duration-200"
         >
           Masuk Dashboard
         </Button>
@@ -101,10 +101,10 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full">
       {/* Abstract Background Side */}
-      <div className="hidden w-1/2 flex-col justify-between bg-blue-600 p-10 text-white lg:flex relative overflow-hidden">
-        <div className="absolute inset-0 bg-linear-to-br from-blue-600 via-blue-700 to-indigo-900">
+      <div className="hidden w-1/2 flex-col justify-between bg-slate-900 p-10 text-white lg:flex relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
           <svg
-            className="absolute inset-0 h-full w-full opacity-30"
+            className="absolute inset-0 h-full w-full opacity-[0.03]"
             xmlns="http://www.w3.org/2000/svg"
           >
             <defs>
@@ -124,29 +124,30 @@ export default function LoginPage() {
             </defs>
             <rect width="100%" height="100%" fill="url(#grid-pattern)" />
           </svg>
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-indigo-950/50 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-slate-950 to-transparent" />
         </div>
 
         <div className="z-20 flex items-center gap-2">
-          <div className="h-8 w-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/10 shadow-xl">
-            <div className="h-4 w-4 rounded-full bg-white shadow-inner" />
+          <div className="h-8 w-8 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 shadow-xl">
+            <div className="h-3 w-3 rounded-sm bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.5)]" />
           </div>
-          <span className="text-xl font-bold tracking-tight">
+          <span className="text-xl font-bold tracking-tight text-slate-100">
             Dashboard Pegawai
           </span>
         </div>
 
         <div className="z-20 max-w-lg">
-          <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight">
-            Kelola Data Kepegawaian dengan Mudah & Cepat.
+          <h1 className="mb-4 text-4xl font-bold leading-tight tracking-tight text-white">
+            Kelola Data Kepegawaian dengan{" "}
+            <span className="text-indigo-400">Mudah & Cepat</span>.
           </h1>
-          <p className="text-lg text-blue-100">
+          <p className="text-lg text-slate-300 leading-relaxed">
             Platform terintegrasi untuk manajemen data pegawai, statistik, dan
             pelaporan yang efisien.
           </p>
         </div>
 
-        <div className="z-20 text-sm text-blue-200">
+        <div className="z-20 text-sm text-slate-400">
           &copy; 2024 Pusdatin. All rights reserved.
         </div>
       </div>

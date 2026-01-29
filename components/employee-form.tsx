@@ -453,14 +453,6 @@ export function EmployeeForm({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="I/a">I/a</SelectItem>
-                            <SelectItem value="I/b">I/b</SelectItem>
-                            <SelectItem value="I/c">I/c</SelectItem>
-                            <SelectItem value="I/d">I/d</SelectItem>
-                            <SelectItem value="II/a">II/a</SelectItem>
-                            <SelectItem value="II/b">II/b</SelectItem>
-                            <SelectItem value="II/c">II/c</SelectItem>
-                            <SelectItem value="II/d">II/d</SelectItem>
                             <SelectItem value="III">III</SelectItem>
                             <SelectItem value="III/a">III/a</SelectItem>
                             <SelectItem value="III/b">III/b</SelectItem>
@@ -470,7 +462,9 @@ export function EmployeeForm({
                             <SelectItem value="IV/b">IV/b</SelectItem>
                             <SelectItem value="IV/c">IV/c</SelectItem>
                             <SelectItem value="IV/d">IV/d</SelectItem>
-                            <SelectItem value="IV/e">IV/e</SelectItem>
+                            <SelectItem value="V">V</SelectItem>
+                            <SelectItem value="VII">VII</SelectItem>
+                            <SelectItem value="IX">IX</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
