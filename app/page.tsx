@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EmployeeDashboard } from "@/components/pages/dashboard";
 import { EmployeeByAge } from "@/components/pages/by-age";
 import { EmployeeByGender } from "@/components/pages/by-gender";
@@ -12,6 +12,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEmployeeStats } from "@/hooks/use-employee-stats";
+import { EmployeeForm } from "@/components/employee-form";
+import { Plus } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { type EmployeeFormValues } from "@/app/actions";
+import { signOut } from "@/app/login/login.actions";
+import { LogOut } from "lucide-react";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard" },
@@ -25,21 +42,78 @@ const tabs = [
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<
+    EmployeeFormValues | undefined
+  >(undefined);
+  const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const { stats, rows, status, error } = useEmployeeStats();
+
+  useEffect(() => {
+    // Check for success message from sessionStorage after reload
+    const storedMessage = sessionStorage.getItem("toast_message");
+    if (storedMessage) {
+      setTimeout(() => {
+        toast.success(storedMessage);
+      }, 100);
+      sessionStorage.removeItem("toast_message");
+    }
+  }, []);
 
   const handlePrintPDF = () => {
     window.print();
   };
 
+  const handleEdit = (row: any) => {
+    // Map row data to form values
+    const formData: EmployeeFormValues = {
+      nama: row.nama_lengkap || "",
+      nik: row.nik || "",
+      nip: row.nip || "",
+
+      tanggal_lahir: row.tanggal_lahir || "",
+      jenis_kelamin: (() => {
+        const val = String(row.jenis_kelamin || "").toLowerCase();
+        if (
+          val.startsWith("p") ||
+          val.includes("female") ||
+          val.includes("wanita")
+        )
+          return "Perempuan";
+        return "Laki-laki";
+      })(),
+      email: row.email || "",
+      status_kepegawaian: (row.kategori as any) || "PNS",
+      jenis_jabatan: (row.jenis_jabatan as any) || "Struktural",
+      eselon: row.eselon || undefined,
+      nama_jabatan: row.jabatan || "",
+      golongan: row.golongan || "",
+      bidang: row.bidang || "",
+      pendidikan_terakhir: (row.pendidikan as any) || "S1-D4",
+    };
+
+    setEditingEmployee(formData);
+    setEditingId(row.id);
+    setIsAddEmployeeOpen(true);
+  };
+
   const renderContent = () => {
     if (activeTab === "tabel") {
-      return <EmployeeTable rows={rows} status={status} error={error} />;
+      return (
+        <EmployeeTable
+          rows={rows}
+          status={status}
+          error={error}
+          isEditMode={isEditMode}
+          onEdit={handleEdit}
+        />
+      );
     }
 
     if (status === "loading") {
       return (
         <div className="space-y-6 animate-in fade-in duration-500">
-          {/* Summary Cards Skeleton */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} className="border border-slate-200 shadow-sm">
@@ -54,8 +128,6 @@ export default function Home() {
               </Card>
             ))}
           </div>
-
-          {/* Charts Skeleton */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
             <Card className="col-span-4 border border-slate-200 shadow-sm">
               <CardHeader>
@@ -121,7 +193,24 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 print:bg-white">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 print:bg-white">
+      <EmployeeForm
+        open={isAddEmployeeOpen}
+        onOpenChange={(open) => {
+          setIsAddEmployeeOpen(open);
+          if (!open) {
+            setEditingEmployee(undefined);
+            setEditingId(undefined);
+          }
+        }}
+        onSuccess={(message) => {
+          sessionStorage.setItem("toast_message", message);
+          window.location.reload();
+        }}
+        initialData={editingEmployee}
+        employeeId={editingId}
+      />
+
       {/* Header */}
       <div className="border-b border-slate-200 bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-6 md:px-8">
@@ -134,12 +223,61 @@ export default function Home() {
                 Dashboard Manajemen Data Pegawai
               </p>
             </div>
-            <Button
-              onClick={handlePrintPDF}
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-md print:hidden"
-            >
-              Print PDF
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant={isEditMode ? "destructive" : "outline"}
+                onClick={() => {
+                  if (!isEditMode) setActiveTab("tabel");
+                  setIsEditMode(!isEditMode);
+                }}
+                className="shadow-md print:hidden"
+              >
+                {isEditMode ? "Batal Ubah" : "Ubah Data"}
+              </Button>
+              <Button
+                onClick={() => setIsAddEmployeeOpen(true)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md print:hidden"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Tambah Data
+              </Button>
+              <Button
+                onClick={handlePrintPDF}
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-md print:hidden"
+              >
+                Print PDF
+              </Button>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="gap-2 text-slate-700 hover:text-red-600 hover:bg-red-50 border-slate-200 shadow-sm print:hidden"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Keluar
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Konfirmasi Keluar</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Apakah Anda yakin ingin keluar dari aplikasi? Anda perlu
+                      login kembali untuk mengakses dashboard.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => signOut()}
+                      className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                    >
+                      Ya, Keluar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
         </div>
       </div>
