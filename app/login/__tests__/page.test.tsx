@@ -37,7 +37,9 @@ describe("Login Page", () => {
     render(<LoginPage />);
     expect(screen.getByText("Dashboard Pegawai")).toBeInTheDocument();
     expect(
-      screen.getByText("Kelola Data Kepegawaian dengan Mudah & Cepat."),
+      screen.getByRole("heading", {
+        name: /Kelola Data Kepegawaian dengan Mudah & Cepat/i,
+      }),
     ).toBeInTheDocument();
   });
 
