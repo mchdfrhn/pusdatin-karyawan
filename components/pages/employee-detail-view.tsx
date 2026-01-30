@@ -26,7 +26,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { deleteEmployee, EmployeeFormValues } from "@/app/actions";
+import { deleteEmployee, updateEmployee } from "@/app/actions";
+import { EmployeeFormValues } from "@/lib/schemas";
+import { TabPribadi } from "@/components/tabs/tab-pribadi";
+import { TabKepegawaian } from "@/components/tabs/tab-kepegawaian";
+import { TabPendidikan } from "@/components/tabs/tab-pendidikan";
 import { toast } from "sonner";
 import {
   Table,
@@ -318,188 +322,20 @@ export function EmployeeDetailView({ employee }: EmployeeDetailViewProps) {
               </TabsList>
             </CardHeader>
             <CardContent className="pt-6 min-h-[400px]">
-              <TabsContent
-                value="pribadi"
-                className="space-y-1 animate-in fade-in slide-in-from-right-2 duration-300"
-              >
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <InfoRow
-                      label="Nama Lengkap"
-                      value={employee.nama_lengkap}
-                    />
-                    <InfoRow
-                      label="Nama Tanpa Gelar"
-                      value={employee.nama_tanpa_gelar}
-                    />
-                    <InfoRow
-                      label="Gelar Belakang"
-                      value={employee.gelar_belakang}
-                    />
-                    <InfoRow label="NIK" value={formData.nik} />
-                    <InfoRow label="NPWP" value={formData.npwp} />
-                  </div>
-                  <div className="space-y-1">
-                    <InfoRow
-                      label="Tempat Lahir"
-                      value={formData.tempat_lahir}
-                    />
-                    <InfoRow
-                      label="Tanggal Lahir"
-                      value={formatDate(formData.tanggal_lahir)}
-                    />
-                    <InfoRow
-                      label="Jenis Kelamin"
-                      value={formData.jenis_kelamin}
-                    />
-                    <InfoRow label="Agama" value={formData.agama} />
-                    <InfoRow
-                      label="Tahun Pengangkatan"
-                      value={String(formData.tahun_pengangkatan || "-")}
-                    />
-                  </div>
-                </div>
-                <div className="mt-4 pt-4 border-t border-slate-100">
-                  <h4 className="font-semibold text-slate-900 mb-2">
-                    Kontak & Alamat
-                  </h4>
-                  <InfoRow label="Alamat Lengkap" value={formData.alamat} />
-                  <InfoRow label="Email" value={formData.email} />
-                  <InfoRow
-                    label="No. Handphone"
-                    value={formData.no_handphone}
-                  />
-                </div>
+              <TabsContent value="pribadi" className="space-y-1">
+                <TabPribadi
+                  employee={employee}
+                  formData={formData}
+                  employeeId={employee.id}
+                />
               </TabsContent>
 
-              <TabsContent
-                value="kepegawaian"
-                className="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300"
-              >
-                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                  <h4 className="font-semibold text-slate-900 mb-3 flex items-center">
-                    <Briefcase className="w-4 h-4 mr-2" />
-                    Status & Jabatan Saat Ini
-                  </h4>
-                  <div className="grid md:grid-cols-2 gap-x-8 gap-y-2">
-                    <InfoRow
-                      label="Status Kepegawaian"
-                      value={formData.status_kepegawaian}
-                    />
-                    <InfoRow
-                      label="Status Jabatan"
-                      value={formData.status_jabatan}
-                    />
-                    <InfoRow
-                      label="Jenis Jabatan"
-                      value={formData.jenis_jabatan}
-                    />
-                    <InfoRow
-                      label="Nama Jabatan"
-                      value={formData.nama_jabatan}
-                    />
-                    <InfoRow
-                      label="Grade Tukin"
-                      value={String(formData.grade_tukin || "-")}
-                    />
-                    <InfoRow
-                      label="BUP (Pensiun)"
-                      value={String(formData.bup || "-") + " Tahun"}
-                    />
-                    <InfoRow
-                      label="Usia Pensiun 2025"
-                      value={
-                        String(formData.usia_pensiun_2025 || "-") + " Tahun"
-                      }
-                    />
-                  </div>
-                </div>
-
-                {/* Specific Jabatan Details */}
-                {formData.jenis_jabatan === "Struktural" && (
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                    <h4 className="font-semibold text-blue-900 mb-3 text-sm">
-                      Detail Struktural
-                    </h4>
-                    <div className="grid md:grid-cols-2 gap-x-8 gap-y-2">
-                      <InfoRow label="Eselon" value={formData.eselon} />
-                      <InfoRow
-                        label="TMT Jabatan"
-                        value={formatDate(formData.tmt_jabatan)}
-                      />
-                      <InfoRow
-                        label="Lama Menjabat"
-                        value={formData.lama_menjabat}
-                      />
-                    </div>
-                  </div>
-                )}
-                {formData.jenis_jabatan === "JFT" && (
-                  <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-                    <h4 className="font-semibold text-green-900 mb-3 text-sm">
-                      Detail Fungsional Tertentu
-                    </h4>
-                    <div className="grid md:grid-cols-2 gap-x-8 gap-y-2">
-                      <InfoRow
-                        label="Jenjang Jabatan"
-                        value={formData.jenjang_jabatan}
-                      />
-                      <InfoRow
-                        label="Nama JFT Tukin"
-                        value={formData.nama_jft_tukin}
-                      />
-                      <InfoRow
-                        label="TMT Jabatan"
-                        value={formatDate(formData.tmt_jabatan)}
-                      />
-                    </div>
-                  </div>
-                )}
-                {formData.jenis_jabatan === "JFU" && (
-                  <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
-                    <h4 className="font-semibold text-orange-900 mb-3 text-sm">
-                      Detail Fungsional Umum (Pelaksana)
-                    </h4>
-                    <div className="grid md:grid-cols-2 gap-x-8 gap-y-2">
-                      <InfoRow
-                        label="Unit Eselon 3"
-                        value={formData.unit_eselon_3}
-                      />
-                      <InfoRow
-                        label="Unit Tugas Adhoc"
-                        value={formData.unit_tugas_adhoc}
-                      />
-                      <InfoRow
-                        label="Atasan Langsung"
-                        value={formData.atasan_langsung}
-                      />
-                      <InfoRow
-                        label="SK Kapusdatin"
-                        value={formData.sk_kapusdatin}
-                      />
-                      <InfoRow
-                        label="Uraian Tugas"
-                        value={formData.uraian_tugas_utama}
-                        fullWidth
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                  <h4 className="font-semibold text-slate-900 mb-3 flex items-center">
-                    <Award className="w-4 h-4 mr-2" />
-                    Pangkat & Golongan
-                  </h4>
-                  <div className="grid md:grid-cols-2 gap-x-8 gap-y-2">
-                    <InfoRow label="Golongan Ruang" value={formData.golongan} />
-                    <InfoRow
-                      label="TMT Pangkat"
-                      value={formatDate(formData.tmt_pangkat)}
-                    />
-                    <InfoRow label="Masa Kerja" value={formData.masa_kerja} />
-                  </div>
-                </div>
+              <TabsContent value="kepegawaian" className="space-y-1">
+                <TabKepegawaian
+                  employee={employee}
+                  formData={formData}
+                  employeeId={employee.id}
+                />
               </TabsContent>
 
               <TabsContent
