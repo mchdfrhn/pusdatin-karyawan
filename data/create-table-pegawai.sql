@@ -19,6 +19,7 @@ CREATE TABLE pegawai (
     
     -- Detail Nama
     nama_lengkap VARCHAR(255),
+    gelar_depan VARCHAR(50),
     nama_tanpa_gelar VARCHAR(255),
     gelar_belakang VARCHAR(50),
     

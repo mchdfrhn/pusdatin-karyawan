@@ -11,7 +11,9 @@ import {
   Plus,
   Trash2,
   Pencil,
+  Eye,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -304,6 +306,7 @@ export function EmployeeTable({
   isEditMode = false,
   onEdit,
 }: EmployeeTableProps) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [educationFilter, setEducationFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -783,11 +786,9 @@ export function EmployeeTable({
                       {column.label}
                     </TableHead>
                   ))}
-                  {isEditMode && (
-                    <TableHead className="w-[80px] font-semibold text-center print:hidden">
-                      Aksi
-                    </TableHead>
-                  )}
+                  <TableHead className="w-[80px] font-semibold text-center print:hidden">
+                    Aksi
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -812,40 +813,24 @@ export function EmployeeTable({
                         </TableCell>
                       );
                     })}
-                    {isEditMode && (
-                      <TableCell className="text-center print:hidden">
-                        <div className="flex items-center justify-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
-                            onClick={() => onEdit?.(row)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={isDeleting}
-                            className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => {
-                              // Try to find the best ID. 'id' is standard, 'uuid' might exist, or 'nip'
-                              const id =
-                                (row.id as string) ||
-                                (row.uuid as string) ||
-                                (row.nip as string);
-                              if (id) setDeleteId(String(id));
-                              else
-                                toast.error(
-                                  "Tidak dapat menemukan ID untuk pegawai ini.",
-                                );
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    )}
+                    <TableCell className="text-center print:hidden">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
+                        onClick={() => {
+                          const id = getRowKey(row, 0);
+                          if (id !== "0") {
+                            router.push(`/employee/${id}`);
+                          } else {
+                            toast.error("ID Pegawai tidak ditemukan.");
+                          }
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                        <span className="sr-only">Lihat Detail</span>
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {pageRows.length === 0 && (
@@ -924,48 +909,6 @@ export function EmployeeTable({
           </div>
         </CardContent>
       </Card>
-
-      <AlertDialog
-        open={!!deleteId}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDeleteId(null);
-            setConfirmationText("");
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tindakan ini tidak dapat dibatalkan. Data pegawai ini akan dihapus
-              permanen dari database.
-              <br />
-              <br />
-              Ketik <strong>hapus</strong> di bawah ini untuk konfirmasi:
-            </AlertDialogDescription>
-            <Input
-              value={confirmationText}
-              onChange={(e) => setConfirmationText(e.target.value)}
-              placeholder='Ketik "hapus" disini...'
-              className="mt-2"
-            />
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                handleDelete();
-              }}
-              disabled={isDeleting || confirmationText !== "hapus"}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              {isDeleting ? "Menghapus..." : "Hapus"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

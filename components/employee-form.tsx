@@ -32,52 +32,12 @@ import {
 } from "@/components/ui/sheet";
 import { useEffect, useTransition } from "react";
 import { toast } from "sonner";
+import { addEmployee, updateEmployee } from "@/app/actions";
 import {
-  addEmployee,
-  updateEmployee,
-  type EmployeeFormValues,
-} from "@/app/actions";
-
-const formSchema = z.object({
-  // Identitas
-  nama: z.string().min(2, {
-    message: "Nama harus diisi minimal 2 karakter.",
-  }),
-  nik: z
-    .string()
-    .length(16, {
-      message: "NIK harus 16 digit.",
-    })
-    .regex(/^\d+$/, { message: "NIK harus berupa angka." }),
-  nip: z.string().optional(),
-
-  tanggal_lahir: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "Tanggal lahir tidak valid.",
-  }),
-  jenis_kelamin: z.enum(["Laki-laki", "Perempuan"], {
-    required_error: "Pilih jenis kelamin.",
-  }),
-  email: z.string().email({
-    message: "Email tidak valid.",
-  }),
-
-  // Kepegawaian
-  status_kepegawaian: z.enum(["PNS", "CPNS", "PPPK", "KI", "PPnPN"], {
-    required_error: "Pilih status kepegawaian.",
-  }),
-  jenis_jabatan: z.enum(["Struktural", "JFT", "JFU"], {
-    required_error: "Pilih jenis jabatan.",
-  }),
-  eselon: z.string().optional(),
-  nama_jabatan: z.string().min(1, { message: "Nama jabatan harus diisi." }),
-  golongan: z.string().optional(),
-  bidang: z.string().optional(),
-
-  // Pendidikan
-  pendidikan_terakhir: z.enum(["SLTA", "D1-D3", "S1-D4", "S2", "S3"], {
-    required_error: "Pilih pendidikan terakhir.",
-  }),
-});
+  employeeFormSchema,
+  EmployeeFormValues,
+  defaultEmployeeValues,
+} from "@/lib/schemas";
 
 interface EmployeeFormProps {
   open: boolean;
@@ -97,48 +57,16 @@ export function EmployeeForm({
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<EmployeeFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: initialData || {
-      nama: "",
-      nik: "",
-      nip: "",
-
-      tanggal_lahir: "",
-      jenis_kelamin: "Laki-laki",
-      email: "",
-      status_kepegawaian: "PNS",
-      jenis_jabatan: "Struktural",
-      nama_jabatan: "",
-      golongan: "",
-      bidang: "",
-
-      pendidikan_terakhir: "S1-D4",
-    },
+    resolver: zodResolver(employeeFormSchema),
+    defaultValues: initialData || defaultEmployeeValues,
   });
 
   // Reset form when initialData changes or open state changes
   useEffect(() => {
     if (open) {
-      form.reset(
-        initialData || {
-          nama: "",
-          nik: "",
-          nip: "",
-
-          tanggal_lahir: "",
-          jenis_kelamin: "Laki-laki",
-          email: "",
-          status_kepegawaian: "PNS",
-          jenis_jabatan: "Struktural",
-          nama_jabatan: "",
-          golongan: "",
-          bidang: "",
-
-          pendidikan_terakhir: "S1-D4",
-        },
-      );
+      form.reset(initialData || defaultEmployeeValues);
     }
-  }, [open, initialData, form]);
+  }, [initialData, open, form]);
 
   // Watch jenis_jabatan to conditionally show/hide/reset eselon
   const jenisJabatan = form.watch("jenis_jabatan");
@@ -197,44 +125,24 @@ export function EmployeeForm({
               onSubmit={form.handleSubmit(handleSubmit)}
               className="space-y-6"
             >
-              {/* Section Identitas */}
               <div className="space-y-4">
                 <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider border-b pb-2">
                   Identitas Diri
                 </h3>
-
-                <FormField
-                  control={form.control}
-                  name="nama"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nama Lengkap</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Nama lengkap beserta gelar"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="bidang"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bidang</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nama Bidang" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="nama"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nama Lengkap</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nama Lengkap" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="nik"
@@ -252,14 +160,30 @@ export function EmployeeForm({
                       </FormItem>
                     )}
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="nip"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>NIP</FormLabel>
+                        <FormLabel>NIP / NRP</FormLabel>
                         <FormControl>
-                          <Input placeholder="Nomor Induk Pegawai" {...field} />
+                          <Input placeholder="NIP / NRP" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="npwp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>NPWP</FormLabel>
+                        <FormControl>
+                          <Input placeholder="NPWP" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -268,6 +192,48 @@ export function EmployeeForm({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="gelar_belakang"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Gelar Belakang</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Contoh: S.Kom" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="nama_tanpa_gelar"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nama Tanpa Gelar</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nama tanpa gelar" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="tempat_lahir"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tempat Lahir</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Kota Lahir" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="tanggal_lahir"
@@ -310,6 +276,37 @@ export function EmployeeForm({
                   />
                   <FormField
                     control={form.control}
+                    name="agama"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Agama</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Pilih Agama" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Islam">Islam</SelectItem>
+                            <SelectItem value="Kristen">Kristen</SelectItem>
+                            <SelectItem value="Katolik">Katolik</SelectItem>
+                            <SelectItem value="Hindu">Hindu</SelectItem>
+                            <SelectItem value="Buddha">Buddha</SelectItem>
+                            <SelectItem value="Konghucu">Konghucu</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
@@ -325,22 +322,47 @@ export function EmployeeForm({
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="no_handphone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>No. Handphone</FormLabel>
+                        <FormControl>
+                          <Input placeholder="0812..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
+                <FormField
+                  control={form.control}
+                  name="alamat"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Alamat Lengkap</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Alamat domisili" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              {/* Section Kepegawaian */}
+              {/* KEPEGAWAIAN */}
               <div className="space-y-4">
                 <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider border-b pb-2 pt-2">
-                  Data Kepegawaian
+                  Status Kepegawaian
                 </h3>
-
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="status_kepegawaian"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status Pegawai</FormLabel>
+                        <FormLabel>Status Keaktifan</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
@@ -362,6 +384,56 @@ export function EmployeeForm({
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="tahun_pengangkatan"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tahun Pengangkatan</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="2024" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="grade_tukin"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Grade Tukin</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="Grade" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="bidang"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bidang / Unit</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nama Bidang" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* JABATAN */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider border-b pb-2 pt-2">
+                  Jabatan
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="jenis_jabatan"
@@ -389,8 +461,20 @@ export function EmployeeForm({
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="nama_jabatan"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nama Jabatan</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nama Jabatan" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-
                 {jenisJabatan === "Struktural" && (
                   <FormField
                     control={form.control}
@@ -408,9 +492,12 @@ export function EmployeeForm({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="II">Eselon II</SelectItem>
-                            <SelectItem value="III">Eselon III</SelectItem>
-                            <SelectItem value="IV">Eselon IV</SelectItem>
+                            <SelectItem value="II.a">II.a</SelectItem>
+                            <SelectItem value="II.b">II.b</SelectItem>
+                            <SelectItem value="III.a">III.a</SelectItem>
+                            <SelectItem value="III.b">III.b</SelectItem>
+                            <SelectItem value="IV.a">IV.a</SelectItem>
+                            <SelectItem value="IV.b">IV.b</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -418,25 +505,42 @@ export function EmployeeForm({
                     )}
                   />
                 )}
-
-                <FormField
-                  control={form.control}
-                  name="nama_jabatan"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nama Jabatan</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Contoh: Analis Kebijakan Ahli Muda"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="tmt_jabatan"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>TMT Jabatan</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lama_menjabat"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Lama Menjabat</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Contoh: 2 Tahun" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* PANGKAT */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider border-b pb-2 pt-2">
+                  Pangkat / Golongan
+                </h3>
+                <div className="grid grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="golongan"
@@ -449,11 +553,10 @@ export function EmployeeForm({
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Pilih Golongan" />
+                              <SelectValue placeholder="Pilih" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="III">III</SelectItem>
                             <SelectItem value="III/a">III/a</SelectItem>
                             <SelectItem value="III/b">III/b</SelectItem>
                             <SelectItem value="III/c">III/c</SelectItem>
@@ -462,11 +565,34 @@ export function EmployeeForm({
                             <SelectItem value="IV/b">IV/b</SelectItem>
                             <SelectItem value="IV/c">IV/c</SelectItem>
                             <SelectItem value="IV/d">IV/d</SelectItem>
-                            <SelectItem value="V">V</SelectItem>
-                            <SelectItem value="VII">VII</SelectItem>
-                            <SelectItem value="IX">IX</SelectItem>
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="tmt_pangkat"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>TMT Pangkat</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="masa_kerja"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Masa Kerja</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Contoh: 10 Tahun" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -474,43 +600,95 @@ export function EmployeeForm({
                 </div>
               </div>
 
-              {/* Section Pendidikan */}
+              {/* PENDIDIKAN */}
               <div className="space-y-4">
                 <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider border-b pb-2 pt-2">
-                  Pendidikan
+                  Pendidikan Terakhir
                 </h3>
-
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="pendidikan_terakhir"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Jenjang</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Pilih Jenjang" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="SLTA">SLTA</SelectItem>
+                            <SelectItem value="D3">D3</SelectItem>
+                            <SelectItem value="D4">D4</SelectItem>
+                            <SelectItem value="S1">S1</SelectItem>
+                            <SelectItem value="S2">S2</SelectItem>
+                            <SelectItem value="S3">S3</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="tahun_lulus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tahun Lulus</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="2010" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
-                  name="pendidikan_terakhir"
+                  name="nama_sekolah"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Pendidikan Terakhir</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Pilih Pendidikan" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="SLTA">SLTA / SMA / SMK</SelectItem>
-                          <SelectItem value="D1-D3">
-                            Diploma (D1 - D3)
-                          </SelectItem>
-                          <SelectItem value="S1-D4">
-                            Sarjana (S1) / D4
-                          </SelectItem>
-                          <SelectItem value="S2">Magister (S2)</SelectItem>
-                          <SelectItem value="S3">Doktor (S3)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Nama Institusi / Sekolah</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nama Kampus / Sekolah" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="jurusan_prodi"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Jurusan / Prodi</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Jurusan" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="no_ijazah_sttb"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>No. Ijazah</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nomor Ijazah" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </form>
           </Form>

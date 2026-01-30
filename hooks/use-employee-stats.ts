@@ -47,7 +47,7 @@ export function useEmployeeStats() {
   useEffect(() => {
     let cancelled = false;
     const tableName =
-      process.env.NEXT_PUBLIC_SUPABASE_EMPLOYEE_TABLE || "employees";
+      process.env.NEXT_PUBLIC_VIEW_PEGAWAI_LENGKAP || "v_pegawai_lengkap";
 
     const load = async () => {
       const supabase = createClient();

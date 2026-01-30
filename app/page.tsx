@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { type EmployeeFormValues } from "@/app/actions";
+
 import { signOut } from "@/app/login/login.actions";
 import { LogOut, Loader2 } from "lucide-react";
 
@@ -44,11 +44,6 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editingEmployee, setEditingEmployee] = useState<
-    EmployeeFormValues | undefined
-  >(undefined);
-  const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const { stats, rows, status, error } = useEmployeeStats();
 
   useEffect(() => {
@@ -66,50 +61,9 @@ export default function Home() {
     window.print();
   };
 
-  const handleEdit = (row: any) => {
-    // Map row data to form values
-    const formData: EmployeeFormValues = {
-      nama: row.nama_lengkap || "",
-      nik: row.nik || "",
-      nip: row.nip || "",
-
-      tanggal_lahir: row.tanggal_lahir || "",
-      jenis_kelamin: (() => {
-        const val = String(row.jenis_kelamin || "").toLowerCase();
-        if (
-          val.startsWith("p") ||
-          val.includes("female") ||
-          val.includes("wanita")
-        )
-          return "Perempuan";
-        return "Laki-laki";
-      })(),
-      email: row.email || "",
-      status_kepegawaian: (row.kategori as any) || "PNS",
-      jenis_jabatan: (row.jenis_jabatan as any) || "Struktural",
-      eselon: row.eselon || undefined,
-      nama_jabatan: row.jabatan || "",
-      golongan: row.golongan || "",
-      bidang: row.bidang || "",
-      pendidikan_terakhir: (row.pendidikan as any) || "S1-D4",
-    };
-
-    setEditingEmployee(formData);
-    setEditingId(row.id);
-    setIsAddEmployeeOpen(true);
-  };
-
   const renderContent = () => {
     if (activeTab === "tabel") {
-      return (
-        <EmployeeTable
-          rows={rows}
-          status={status}
-          error={error}
-          isEditMode={isEditMode}
-          onEdit={handleEdit}
-        />
-      );
+      return <EmployeeTable rows={rows} status={status} error={error} />;
     }
 
     if (status === "loading") {
@@ -199,17 +153,11 @@ export default function Home() {
         open={isAddEmployeeOpen}
         onOpenChange={(open) => {
           setIsAddEmployeeOpen(open);
-          if (!open) {
-            setEditingEmployee(undefined);
-            setEditingId(undefined);
-          }
         }}
         onSuccess={(message) => {
           sessionStorage.setItem("toast_message", message);
           window.location.reload();
         }}
-        initialData={editingEmployee}
-        employeeId={editingId}
       />
 
       {/* Header */}
@@ -225,16 +173,6 @@ export default function Home() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant={isEditMode ? "destructive" : "outline"}
-                onClick={() => {
-                  if (!isEditMode) setActiveTab("tabel");
-                  setIsEditMode(!isEditMode);
-                }}
-                className="shadow-md print:hidden"
-              >
-                {isEditMode ? "Batal Ubah" : "Ubah Data"}
-              </Button>
               <Button
                 onClick={() => setIsAddEmployeeOpen(true)}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md print:hidden"
