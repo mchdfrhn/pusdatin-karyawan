@@ -1,4 +1,4 @@
-CREATE TABLE pegawai (
+CREATE TABLE karyawan (
     id SERIAL PRIMARY KEY, -- ID otomatis sebagai primary key
     nip VARCHAR(50) UNIQUE, -- NIP sebagai identitas unik
     nama_lengkap TEXT NOT NULL,
@@ -17,4 +17,4 @@ CREATE TABLE pegawai (
 );
 
 -- Tambahkan index pada NIP agar pencarian data pegawai lebih cepat
-CREATE INDEX idx_pegawai_nip ON pegawai(nip);
+CREATE INDEX idx_karyawan_nip ON karyawan(nip);
